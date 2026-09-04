@@ -155,12 +155,16 @@
   // ---------------------------------------------------------------------
   // Generic checklist helper (tasks / weekly / monthly / yearly goals)
   // ---------------------------------------------------------------------
-  function renderChecklist(listEl, items, labelEl, onToggle, onDelete) {
+  function renderChecklist(listEl, items, labelEl, onToggle, onDelete, emptyTitle, emptySub) {
     listEl.innerHTML = "";
     if (!items || items.length === 0) {
       const li = document.createElement("li");
-      li.className = "empty-hint";
-      li.textContent = "Nothing yet — add one above.";
+      li.style.border = "none";
+      li.innerHTML =
+        '<div class="empty-state">' +
+          '<div class="empty-state-title">' + (emptyTitle || "Nothing yet") + '</div>' +
+          '<div class="empty-state-sub">' + (emptySub || "Add one above when you’re ready.") + '</div>' +
+        '</div>';
       listEl.appendChild(li);
     } else {
       items.forEach(function (item) {
@@ -213,7 +217,8 @@
       function del(id) {
         setTasks(getTasks().filter(function (t) { return t.id !== id; }));
         renderTasks(); updateStreak();
-      });
+      },
+      "Nothing planned yet", "Add your first task for today.");
   }
 
   taskForm.addEventListener("submit", function (e) {
@@ -245,7 +250,8 @@
       function del(id) {
         setWeekly(getWeekly().filter(function (g) { return g.id !== id; }));
         renderWeekly();
-      });
+      },
+      "No goals yet", "Add your first goal for this week.");
   }
 
   weeklyForm.addEventListener("submit", function (e) {
@@ -276,12 +282,14 @@
   function renderMonthly() {
     renderChecklist(monthlyList, getMonthly(), null,
       function toggle(id) { setMonthly(getMonthly().map(function (g) { return g.id === id ? Object.assign({}, g, { done: !g.done }) : g; })); renderMonthly(); },
-      function del(id) { setMonthly(getMonthly().filter(function (g) { return g.id !== id; })); renderMonthly(); });
+      function del(id) { setMonthly(getMonthly().filter(function (g) { return g.id !== id; })); renderMonthly(); },
+      "No goals yet", "Add your first goal for this month.");
   }
   function renderYearly() {
     renderChecklist(yearlyList, getYearly(), null,
       function toggle(id) { setYearly(getYearly().map(function (g) { return g.id === id ? Object.assign({}, g, { done: !g.done }) : g; })); renderYearly(); },
-      function del(id) { setYearly(getYearly().filter(function (g) { return g.id !== id; })); renderYearly(); });
+      function del(id) { setYearly(getYearly().filter(function (g) { return g.id !== id; })); renderYearly(); },
+      "No goals yet", "Add your first goal for this year.");
   }
 
   monthlyForm.addEventListener("submit", function (e) {
@@ -321,18 +329,16 @@
   function renderProgress() {
     progressList.innerHTML = "";
     if (!state.progressGoals.length) {
-      const p = document.createElement("p");
-      p.className = "empty-hint";
-      p.textContent = "No progress goals yet. Click + New to add one (e.g. \"Read 24 books this year\").";
-      progressList.appendChild(p);
+      progressList.innerHTML =
+        '<div class="empty-state">' +
+          '<div class="empty-state-title">No progress goals yet</div>' +
+          '<div class="empty-state-sub">Click + New to add one, e.g. “Read 24 books this year.”</div>' +
+        '</div>';
       return;
     }
-    const RADIUS = 39;
-    const CIRC = 2 * Math.PI * RADIUS;
 
     state.progressGoals.forEach(function (g) {
       const pct = g.target > 0 ? Math.min(100, Math.round((g.current / g.target) * 100)) : 0;
-      const offset = CIRC - (pct / 100) * CIRC;
 
       const wrap = document.createElement("div");
       wrap.className = "progress-item";
@@ -342,31 +348,30 @@
       del.addEventListener("click", function () { deleteProgressGoal(g.id); });
       wrap.appendChild(del);
 
-      const ring = document.createElement("div");
-      ring.className = "progress-ring";
-      ring.innerHTML =
-        '<svg viewBox="0 0 92 92">' +
-          '<circle class="ring-track" cx="46" cy="46" r="' + RADIUS + '"></circle>' +
-          '<circle class="ring-fill" cx="46" cy="46" r="' + RADIUS + '" ' +
-            'stroke-dasharray="' + CIRC.toFixed(2) + '" ' +
-            'stroke-dashoffset="' + offset.toFixed(2) + '"></circle>' +
-        '</svg>';
-      const label = document.createElement("span");
-      label.className = "progress-ring-label";
-      label.textContent = pct + "%";
-      ring.appendChild(label);
-      wrap.appendChild(ring);
-
-      const name = document.createElement("div");
+      const head = document.createElement("div");
+      head.className = "progress-item-head";
+      const name = document.createElement("span");
       name.className = "progress-item-name";
       name.textContent = g.name;
-      wrap.appendChild(name);
-
-      const val = document.createElement("div");
+      const val = document.createElement("span");
       val.className = "progress-item-val";
       val.textContent = g.current + " / " + g.target + (g.unit ? " " + g.unit : "");
-      wrap.appendChild(val);
+      head.appendChild(name); head.appendChild(val);
+      wrap.appendChild(head);
 
+      const track = document.createElement("div");
+      track.className = "progress-track";
+      const fill = document.createElement("div");
+      fill.className = "progress-fill";
+      fill.style.width = pct + "%";
+      track.appendChild(fill);
+      wrap.appendChild(track);
+
+      const foot = document.createElement("div");
+      foot.className = "progress-item-foot";
+      const pctLabel = document.createElement("span");
+      pctLabel.className = "progress-pct";
+      pctLabel.textContent = pct + "%";
       const controls = document.createElement("div");
       controls.className = "progress-controls";
       const minus = document.createElement("button"); minus.textContent = "–";
@@ -374,7 +379,8 @@
       const plus = document.createElement("button"); plus.textContent = "+";
       plus.addEventListener("click", function () { updateProgressGoal(g.id, 1); });
       controls.appendChild(minus); controls.appendChild(plus);
-      wrap.appendChild(controls);
+      foot.appendChild(pctLabel); foot.appendChild(controls);
+      wrap.appendChild(foot);
 
       progressList.appendChild(wrap);
     });
@@ -414,7 +420,7 @@
   const habitNameInput = document.getElementById("habitNameInput");
   const habitSaveBtn = document.getElementById("habitSaveBtn");
   const habitColorSwatches = document.getElementById("habitColorSwatches");
-  const HABIT_COLORS = ["#d4af37", "#6b8afd", "#3ecf8e", "#e5484d", "#c084fc", "#f59e0b"];
+  const HABIT_COLORS = ["#8291ff", "#4fae8a", "#c9974a", "#d9686c", "#c084fc", "#5eb8d9"];
   let selectedHabitColor = HABIT_COLORS[0];
 
   HABIT_COLORS.forEach(function (c, i) {
@@ -467,10 +473,12 @@
     habitGrid.appendChild(head);
 
     if (!state.habits.length) {
-      const empty = document.createElement("p");
-      empty.className = "empty-hint";
-      empty.style.padding = "4px 18px 16px";
-      empty.textContent = "No habits yet. Click + New to start tracking one.";
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.style.padding = "2px 18px 16px";
+      empty.innerHTML =
+        '<div class="empty-state-title">No habits yet</div>' +
+        '<div class="empty-state-sub">Click + New to start tracking one.</div>';
       habitGrid.appendChild(empty);
       return;
     }
@@ -482,7 +490,7 @@
       const nameWrap = document.createElement("div");
       nameWrap.className = "habit-name";
       const dot = document.createElement("span");
-      dot.className = "habit-dot";
+      dot.className = "habit-dot-swatch";
       dot.style.background = habit.color;
       const nameText = document.createElement("span");
       nameText.textContent = habit.name;
@@ -538,7 +546,7 @@
   // Daily Journal
   // ---------------------------------------------------------------------
   const journalText = document.getElementById("journalText");
-  const journalSavedLabel = document.getElementById("journalSavedLabel");
+  const journalHintLabel = document.getElementById("journalHintLabel");
   const journalHistoryBtn = document.getElementById("journalHistoryBtn");
   const journalHistoryModal = document.getElementById("journalHistoryModal");
   const journalHistoryBody = document.getElementById("journalHistoryBody");
@@ -552,14 +560,14 @@
     journalDebounce = setTimeout(function () {
       state.journal[TODAY_KEY] = journalText.value;
       persist();
-      journalSavedLabel.textContent = "saved " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      journalHintLabel.textContent = "Saved just now";
     }, 400);
   });
   journalHistoryBtn.addEventListener("click", function () {
     journalHistoryBody.innerHTML = "";
     const keys = Object.keys(state.journal).filter(function (k) { return state.journal[k] && state.journal[k].trim(); }).sort().reverse();
     if (!keys.length) {
-      journalHistoryBody.innerHTML = '<p class="empty-hint">No journal entries yet.</p>';
+      journalHistoryBody.innerHTML = '<div class="empty-state"><div class="empty-state-title">No journal entries yet</div></div>';
     } else {
       keys.forEach(function (k) {
         const item = document.createElement("div");
@@ -580,18 +588,22 @@
   const quoteAuthor = document.getElementById("quoteAuthor");
   const shuffleQuoteBtn = document.getElementById("shuffleQuoteBtn");
 
+  // Cycles to the next quote every time the page loads (not stable per-day
+  // like the reading pick) — advanced once here, at script start.
+  let quoteIndex = (typeof state.quoteIndex === "number" ? state.quoteIndex + 1 : dayHash(TODAY_KEY, QUOTES.length)) % QUOTES.length;
+  state.quoteIndex = quoteIndex;
+  saveLocal();
+
   function renderQuote() {
-    let idx = state.quoteState[TODAY_KEY];
-    if (idx === undefined) { idx = dayHash(TODAY_KEY, QUOTES.length); state.quoteState[TODAY_KEY] = idx; persist(); }
-    const q = QUOTES[idx % QUOTES.length];
+    const q = QUOTES[quoteIndex % QUOTES.length];
     quoteText.textContent = "“" + q.text + "”";
     quoteAuthor.textContent = "— " + q.author;
   }
   shuffleQuoteBtn.addEventListener("click", function () {
-    const current = state.quoteState[TODAY_KEY];
     let next = Math.floor(Math.random() * QUOTES.length);
-    if (next === current && QUOTES.length > 1) next = (next + 1) % QUOTES.length;
-    state.quoteState[TODAY_KEY] = next;
+    if (next === quoteIndex && QUOTES.length > 1) next = (next + 1) % QUOTES.length;
+    quoteIndex = next;
+    state.quoteIndex = next;
     persist(); renderQuote();
   });
 
@@ -601,10 +613,13 @@
   const readingTag = document.getElementById("readingTag");
   const readingTitle = document.getElementById("readingTitle");
   const readingBody = document.getElementById("readingBody");
+  const readingContinueBtn = document.getElementById("readingContinueBtn");
   const readingShuffleBtn = document.getElementById("readingShuffleBtn");
   const readingDoneCheck = document.getElementById("readingDoneCheck");
   const readingInterestsBtn = document.getElementById("readingInterestsBtn");
   const interestChecks = document.getElementById("interestChecks");
+  const READING_EXCERPT_LEN = 190;
+  let readingExpanded = false;
 
   function matchingReadings() {
     const active = state.interests || [];
@@ -629,15 +644,29 @@
     const cur = currentReadingEntry();
     readingTag.textContent = cur.entry.tags[0];
     readingTitle.textContent = cur.entry.title;
-    readingBody.textContent = cur.entry.body;
+    const full = cur.entry.body;
+    const needsTruncation = full.length > READING_EXCERPT_LEN;
+    if (readingExpanded || !needsTruncation) {
+      readingBody.textContent = full;
+      readingContinueBtn.classList.add("hidden");
+    } else {
+      readingBody.textContent = full.slice(0, READING_EXCERPT_LEN).replace(/\s+\S*$/, "") + "…";
+      readingContinueBtn.classList.remove("hidden");
+      readingContinueBtn.textContent = "Continue reading →";
+    }
     readingDoneCheck.checked = cur.done;
   }
+  readingContinueBtn.addEventListener("click", function () {
+    readingExpanded = true;
+    renderReading();
+  });
   readingShuffleBtn.addEventListener("click", function () {
     const pool = matchingReadings();
     const current = state.readingState[TODAY_KEY] ? state.readingState[TODAY_KEY].id : null;
     let candidate = pool[Math.floor(Math.random() * pool.length)];
     if (pool.length > 1) { while (candidate.id === current) candidate = pool[Math.floor(Math.random() * pool.length)]; }
     state.readingState[TODAY_KEY] = { id: candidate.id, done: false };
+    readingExpanded = false;
     persist(); renderReading();
   });
   readingDoneCheck.addEventListener("change", function () {
@@ -667,33 +696,75 @@
   readingInterestsBtn.addEventListener("click", function () { openModal(document.getElementById("settingsModal")); });
 
   // ---------------------------------------------------------------------
-  // Daily Calendar
+  // Calendar — a native, dark, custom month grid. Google's iframe embed
+  // can't be recolored (cross-origin, no dark-mode option), so instead of
+  // visually embedding it, Ascend. renders its own month view and links
+  // out to the connected calendar for the full view / event details.
   // ---------------------------------------------------------------------
-  const calendarFrame = document.getElementById("calendarFrame");
-  const calendarWrap = document.getElementById("calendarEmbedWrap");
-  const calendarSetupBtn = document.getElementById("calendarSetupBtn");
+  const calendarWidget = document.getElementById("calendarWidget");
   const calendarModal = document.getElementById("calendarModal");
   const calendarUrlInput = document.getElementById("calendarUrlInput");
   const calendarUrlInput2 = document.getElementById("calendarUrlInput2");
   const calendarSaveBtn = document.getElementById("calendarSaveBtn");
+  const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  let calendarViewDate = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
 
   function renderCalendar() {
-    if (state.calendarUrl) {
-      calendarFrame.src = state.calendarUrl;
-      calendarWrap.classList.add("connected");
-    } else {
-      calendarWrap.classList.remove("connected");
-    }
     calendarUrlInput.value = state.calendarUrl || "";
+
+    const year = calendarViewDate.getFullYear();
+    const month = calendarViewDate.getMonth();
+    const firstOfMonth = new Date(year, month, 1);
+    const startOffset = (firstOfMonth.getDay() + 6) % 7; // Monday-first
+    const gridStart = addDays(firstOfMonth, -startOffset);
+
+    let html = '<div class="calendar-toolbar">' +
+      '<span class="calendar-month-label">' + MONTH_NAMES[month] + ' ' + year + '</span>' +
+      '<div class="calendar-nav">' +
+        '<button class="icon-btn btn-small" id="calPrevBtn">‹</button>' +
+        '<button class="icon-btn btn-small" id="calTodayBtn">•</button>' +
+        '<button class="icon-btn btn-small" id="calNextBtn">›</button>' +
+      '</div>' +
+    '</div>';
+
+    html += '<div class="calendar-grid">';
+    ["M","T","W","T","F","S","S"].forEach(function (d) { html += '<div class="calendar-weekday">' + d + '</div>'; });
+    for (let i = 0; i < 42; i++) {
+      const d = addDays(gridStart, i);
+      const isOtherMonth = d.getMonth() !== month;
+      const isToday = dateKey(d) === TODAY_KEY;
+      html += '<div class="calendar-cell' + (isOtherMonth ? ' other-month' : '') + (isToday ? ' today' : '') + '">' + d.getDate() + '</div>';
+    }
+    html += '</div>';
+
+    html += '<div class="calendar-footer">' +
+      '<span class="calendar-footer-hint">' + (state.calendarUrl ? "Connected" : "No calendar connected") + '</span>' +
+      (state.calendarUrl
+        ? '<a class="btn-secondary" href="' + state.calendarUrl.replace(/"/g, "&quot;") + '" target="_blank" rel="noopener">Open Google Calendar</a>'
+        : '<button class="btn-secondary" id="calConnectBtn">Connect</button>') +
+    '</div>';
+
+    calendarWidget.innerHTML = html;
+
+    document.getElementById("calPrevBtn").addEventListener("click", function () {
+      calendarViewDate = new Date(year, month - 1, 1); renderCalendar();
+    });
+    document.getElementById("calNextBtn").addEventListener("click", function () {
+      calendarViewDate = new Date(year, month + 1, 1); renderCalendar();
+    });
+    document.getElementById("calTodayBtn").addEventListener("click", function () {
+      calendarViewDate = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1); renderCalendar();
+    });
+    const connectBtn = document.getElementById("calConnectBtn");
+    if (connectBtn) connectBtn.addEventListener("click", function () {
+      calendarUrlInput2.value = state.calendarUrl || "";
+      openModal(calendarModal);
+    });
   }
   function saveCalendarUrl(url) {
     state.calendarUrl = url.trim();
     persist(); renderCalendar();
   }
-  calendarSetupBtn.addEventListener("click", function () {
-    calendarUrlInput2.value = state.calendarUrl || "";
-    openModal(calendarModal);
-  });
   calendarSaveBtn.addEventListener("click", function () {
     saveCalendarUrl(calendarUrlInput2.value);
     closeModal(calendarModal);
@@ -717,7 +788,24 @@
       while (dayHasCompletedTask(dateKey(cursor))) { streak++; cursor = addDays(cursor, -1); }
       best = streak;
     }
-    streakBadge.textContent = "🔥 " + best + " day" + (best === 1 ? "" : "s") + " streak";
+    streakBadge.textContent = (best > 0 ? "🔥 " : "") + best + " day" + (best === 1 ? "" : "s") + " streak";
+    updateSummaryStrip();
+  }
+
+  // ---------------------------------------------------------------------
+  // Header greeting + compact summary strip
+  // ---------------------------------------------------------------------
+  function updateSummaryStrip() {
+    const el = document.getElementById("summaryStrip");
+    if (!el) return;
+    const tasksLeft = getTasks().filter(function (t) { return !t.done; }).length;
+    const habitsLeft = state.habits.filter(function (h) { return !isLogged(h.id, TODAY_KEY); }).length;
+    const goalsInProgress = getWeekly().filter(function (g) { return !g.done; }).length;
+    const parts = [];
+    parts.push(tasksLeft + (tasksLeft === 1 ? " task" : " tasks") + " left today");
+    if (state.habits.length) parts.push(habitsLeft + (habitsLeft === 1 ? " habit" : " habits") + " left today");
+    if (getWeekly().length) parts.push(goalsInProgress + (goalsInProgress === 1 ? " goal" : " goals") + " in progress");
+    el.innerHTML = parts.join('<span class="dot">·</span>');
   }
 
   // ---------------------------------------------------------------------
@@ -757,11 +845,16 @@
   });
 
   // ---------------------------------------------------------------------
-  // Top bar date
+  // Top bar: greeting + date
   // ---------------------------------------------------------------------
   document.getElementById("todayDate").textContent = TODAY.toLocaleDateString(undefined, {
-    weekday: "long", year: "numeric", month: "long", day: "numeric"
+    weekday: "short", month: "short", day: "numeric"
   });
+  (function setGreeting() {
+    const hour = TODAY.getHours();
+    const part = hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
+    document.getElementById("greetingText").textContent = "Good " + part + ".";
+  })();
 
   // ---------------------------------------------------------------------
   // Render everything

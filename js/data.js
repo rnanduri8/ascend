@@ -34,7 +34,21 @@ const QUOTES = [
   { text: "Whether you think you can or you think you can't, you're right.", author: "Henry Ford" },
   { text: "The most painful thing is losing yourself in the process of loving someone else too much, and forgetting that you are special too.", author: "Ernest Hemingway" },
   { text: "Get busy living or get busy dying.", author: "Stephen King" },
-  { text: "If you want something you've never had, you must be willing to do something you've never done.", author: "Thomas Jefferson" }
+  { text: "If you want something you've never had, you must be willing to do something you've never done.", author: "Thomas Jefferson" },
+
+  // Blunter, harder-edged entries — no one's coming to save you, so move.
+  { text: "Everyone is rooting for you to fail. Not out of malice — it's just easier for them if you stay where you are.", author: "Anonymous" },
+  { text: "Nobody is thinking about you. They're too busy worrying about themselves. Use the silence.", author: "Anonymous" },
+  { text: "The world doesn't owe you a rescue. It never promised one.", author: "Anonymous" },
+  { text: "You are not behind. You are exactly where your effort has put you.", author: "Anonymous" },
+  { text: "Stop waiting for it to feel right. It rarely does, right up until it's done.", author: "Anonymous" },
+  { text: "Nobody is impressed by your potential anymore. They stopped believing in it around the same time you did.", author: "Anonymous" },
+  { text: "The version of you that keeps quitting at day nine is the only one anyone will remember.", author: "Anonymous" },
+  { text: "Being tired is not a signal to stop. It's the price of admission.", author: "Anonymous" },
+  { text: "Most people's biggest competitor is the version of themselves from six months ago — and they're still losing to him.", author: "Anonymous" },
+  { text: "No one is going to hand you discipline. You either build it today or you explain, again, why you didn't.", author: "Anonymous" },
+  { text: "The excuse that worked yesterday is why today looks the same as yesterday.", author: "Anonymous" },
+  { text: "Sympathy doesn't compound. Work does.", author: "Anonymous" }
 ];
 
 // Reading interest categories shown in Settings

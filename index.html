@@ -15,19 +15,24 @@
 <div class="bg-glow"></div>
 
 <header class="topbar">
-  <div class="brand">
-    <span class="brand-mark">◆</span>
-    <span class="brand-name">ASCEND.</span>
+  <div class="topbar-row">
+    <div class="brand">
+      <span class="brand-mark">◆</span>
+      <span class="brand-name">ASCEND.</span>
+    </div>
+    <div class="topbar-actions">
+      <span id="streakBadge" class="sync-status">0 day streak</span>
+      <span id="syncStatus" class="sync-status" title="Cloud sync status">connecting…</span>
+      <button class="icon-btn" id="settingsBtn" title="Settings">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </button>
+    </div>
   </div>
-  <div class="topbar-center">
-    <span id="todayDate" class="today-date"></span>
-    <span class="dot-sep">·</span>
-    <span id="streakBadge" class="streak-badge">🔥 0 day streak</span>
+  <div class="greeting-row">
+    <span id="greetingText" class="greeting-text"></span>
+    <span id="todayDate" class="greeting-sub"></span>
   </div>
-  <div class="topbar-actions">
-    <span id="syncStatus" class="sync-status" title="Cloud sync status">connecting…</span>
-    <button class="icon-btn" id="settingsBtn" title="Settings">⚙</button>
-  </div>
+  <div id="summaryStrip" class="summary-strip"></div>
 </header>
 
 <main class="board">
@@ -35,7 +40,10 @@
   <!-- ROW 1 -->
   <section class="card card-tasks" data-card="tasks">
     <div class="card-head">
-      <h2>Daily Task Planner</h2>
+      <div class="card-head-left">
+        <svg class="icon" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+        <h2>Tasks</h2>
+      </div>
       <span class="card-sub" id="taskProgressLabel">0/0</span>
     </div>
     <div class="card-body">
@@ -49,23 +57,23 @@
 
   <section class="card card-calendar" data-card="calendar">
     <div class="card-head">
-      <h2>Daily Calendar</h2>
+      <div class="card-head-left">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        <h2>Calendar</h2>
+      </div>
       <span class="card-sub">Google Calendar</span>
     </div>
     <div class="card-body no-pad">
-      <div id="calendarEmbedWrap" class="calendar-wrap">
-        <iframe id="calendarFrame" src="" style="border:0" frameborder="0" scrolling="no"></iframe>
-        <div id="calendarPlaceholder" class="calendar-placeholder">
-          <p>No calendar connected yet.</p>
-          <button class="btn-ghost" id="calendarSetupBtn">Connect Google Calendar</button>
-        </div>
-      </div>
+      <div id="calendarWidget" class="calendar-wrap"></div>
     </div>
   </section>
 
   <section class="card card-weekly" data-card="weekly">
     <div class="card-head">
-      <h2>Weekly Goals</h2>
+      <div class="card-head-left">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+        <h2>Weekly Goals</h2>
+      </div>
       <span class="card-sub" id="weeklyProgressLabel">0/0</span>
     </div>
     <div class="card-body">
@@ -80,7 +88,10 @@
   <!-- ROW 2 -->
   <section class="card card-longgoals" data-card="longgoals">
     <div class="card-head">
-      <h2>Monthly / Yearly Goals</h2>
+      <div class="card-head-left">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+        <h2>Monthly / Yearly Goals</h2>
+      </div>
       <div class="tabs" id="goalTabs">
         <button class="tab active" data-tab="monthly">Monthly</button>
         <button class="tab" data-tab="yearly">Yearly</button>
@@ -103,7 +114,10 @@
 
   <section class="card card-progress" data-card="progress">
     <div class="card-head">
-      <h2>Visual Goal Progress</h2>
+      <div class="card-head-left">
+        <svg class="icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+        <h2>Goal Progress</h2>
+      </div>
       <button class="btn-ghost btn-small" id="addProgressGoalBtn">+ New</button>
     </div>
     <div class="card-body">
@@ -113,7 +127,10 @@
 
   <section class="card card-habits" data-card="habits">
     <div class="card-head">
-      <h2>Habit Tracker</h2>
+      <div class="card-head-left">
+        <svg class="icon" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+        <h2>Habit Tracker</h2>
+      </div>
       <button class="btn-ghost btn-small" id="addHabitBtn">+ New</button>
     </div>
     <div class="card-body no-pad">
@@ -124,21 +141,26 @@
   <!-- ROW 3 -->
   <section class="card card-journal" data-card="journal">
     <div class="card-head">
-      <h2>Daily Journal</h2>
-      <span class="card-sub" id="journalSavedLabel"></span>
+      <div class="card-head-left">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="15"></line></svg>
+        <h2>Journal</h2>
+      </div>
     </div>
     <div class="card-body">
-      <textarea id="journalText" placeholder="What's on your mind today?"></textarea>
+      <textarea id="journalText" class="journal-editor" placeholder="What's on your mind today?"></textarea>
       <div class="journal-actions">
         <button class="btn-ghost btn-small" id="journalHistoryBtn">History</button>
-        <span class="save-hint">Autosaves as you type</span>
+        <span class="save-hint" id="journalHintLabel">Autosaves as you type</span>
       </div>
     </div>
   </section>
 
   <section class="card card-quote" data-card="quote">
     <div class="card-head">
-      <h2>Daily Motivation</h2>
+      <div class="card-head-left">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"></path><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"></path></svg>
+        <h2>Daily Motivation</h2>
+      </div>
       <button class="icon-btn btn-small" id="shuffleQuoteBtn" title="Another quote">⟳</button>
     </div>
     <div class="card-body quote-body">
@@ -149,16 +171,20 @@
 
   <section class="card card-reading" data-card="reading">
     <div class="card-head">
-      <h2>Daily Reading</h2>
+      <div class="card-head-left">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+        <h2>Daily Reading</h2>
+      </div>
       <button class="btn-ghost btn-small" id="readingInterestsBtn">Interests</button>
     </div>
     <div class="card-body">
       <div class="reading-tag" id="readingTag"></div>
       <h3 id="readingTitle" class="reading-title"></h3>
       <p id="readingBody" class="reading-body"></p>
+      <button class="reading-continue" id="readingContinueBtn">Continue reading →</button>
       <div class="journal-actions">
         <button class="btn-ghost btn-small" id="readingShuffleBtn">Another one</button>
-        <label class="mark-read"><input type="checkbox" id="readingDoneCheck" /> Mark as read</label>
+        <label class="mark-read"><input type="checkbox" id="readingDoneCheck" /><span class="box">✓</span> Mark as read</label>
       </div>
     </div>
   </section>
@@ -177,7 +203,7 @@
     <div class="modal-body">
       <label class="field-label">Google Calendar embed URL</label>
       <input type="text" id="calendarUrlInput" placeholder="https://calendar.google.com/calendar/embed?src=..." />
-      <p class="field-hint">Google Calendar → Settings → select your calendar → "Integrate calendar" → copy the "Embed code" src URL.</p>
+      <p class="field-hint">Used for the "Open in Google Calendar" link. Google Calendar → Settings → select your calendar → "Integrate calendar" → copy the "Embed code" src URL, or the public calendar link.</p>
 
       <label class="field-label">Reading interests</label>
       <div id="interestChecks" class="chip-group"></div>
@@ -198,7 +224,7 @@
   <div class="modal">
     <div class="modal-head"><h3>Connect Google Calendar</h3><button class="icon-btn" data-close>✕</button></div>
     <div class="modal-body">
-      <p class="field-hint">Paste the embed URL from Google Calendar's "Integrate calendar" settings page.</p>
+      <p class="field-hint">Paste your calendar's public or embed URL. Ascend. links out to it (Google's calendar surface can't be recolored to match this theme, so we keep the dashboard native and link out for the full view).</p>
       <input type="text" id="calendarUrlInput2" placeholder="https://calendar.google.com/calendar/embed?src=..." />
       <div class="settings-row" style="margin-top:14px;">
         <button class="btn-primary" id="calendarSaveBtn">Save</button>
