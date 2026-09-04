@@ -1,7 +1,6 @@
 // ============================================================================
 // Ascend. — application logic
-// Vanilla JS. Everything persists to this browser's localStorage — no
-// account, no server, nothing to configure.
+// Vanilla JS. Firebase Firestore (optional) + localStorage cache.
 // ============================================================================
 
 (function () {
@@ -69,6 +68,8 @@
 
   let state = loadLocal() || defaultState();
   let saveTimer = null;
+  let firestoreDoc = null; // set once Firebase is ready
+  let applyingRemote = false; // guards against write-loop when snapshot arrives
 
   function loadLocal() {
     try {
@@ -83,24 +84,72 @@
     try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) { /* ignore quota errors */ }
   }
 
-  // ---------------------------------------------------------------------
-  // Persistence — everything lives in this browser's localStorage.
-  // ---------------------------------------------------------------------
-  const syncStatusEl = document.getElementById("syncStatus");
-  function flashSyncStatus() {
-    if (!syncStatusEl) return;
-    syncStatusEl.classList.add("ok");
-    syncStatusEl.textContent = "saved ✓";
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(function () {
-      syncStatusEl.classList.remove("ok");
-      syncStatusEl.textContent = "saved locally";
-    }, 900);
-  }
-
   function persist() {
     saveLocal();
-    flashSyncStatus();
+    if (applyingRemote) return; // don't echo remote-triggered renders back up
+    if (!firestoreDoc) return;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () {
+      firestoreDoc.set(state, { merge: false }).catch(function (err) {
+        console.warn("Ascend: cloud save failed", err);
+        setSyncStatus("err", "sync error");
+      });
+    }, 500);
+  }
+
+  // ---------------------------------------------------------------------
+  // Firebase (optional — falls back to localStorage-only silently)
+  // ---------------------------------------------------------------------
+  const syncStatusEl = document.getElementById("syncStatus");
+  function setSyncStatus(cls, text) {
+    syncStatusEl.className = "sync-status " + cls;
+    syncStatusEl.textContent = text;
+  }
+
+  function initFirebase() {
+    const cfg = window.FIREBASE_CONFIG;
+    const configured = cfg && cfg.apiKey && cfg.projectId;
+    if (!configured) {
+      setSyncStatus("", "local only");
+      document.getElementById("firebaseStatusText").textContent =
+        "Not connected — data is saved to this browser only. Add your Firebase config in js/firebase-config.js to sync across devices.";
+      return;
+    }
+    try {
+      firebase.initializeApp(cfg);
+      setSyncStatus("", "connecting…");
+      firebase.auth().signInAnonymously().catch(function (err) {
+        console.warn("Ascend: auth failed", err);
+        setSyncStatus("err", "auth error");
+      });
+      firebase.auth().onAuthStateChanged(function (user) {
+        if (!user) return;
+        const db = firebase.firestore();
+        firestoreDoc = db.collection("users").doc(user.uid);
+        document.getElementById("firebaseStatusText").textContent =
+          "Connected — syncing to Firestore (user " + user.uid.slice(0, 8) + "…).";
+        firestoreDoc.onSnapshot(function (snap) {
+          if (!snap.exists) {
+            // first run for this user — push current (likely local) state up
+            firestoreDoc.set(state).catch(function () {});
+            setSyncStatus("ok", "synced");
+            return;
+          }
+          applyingRemote = true;
+          state = Object.assign(defaultState(), snap.data());
+          saveLocal();
+          renderAll();
+          applyingRemote = false;
+          setSyncStatus("ok", "synced");
+        }, function (err) {
+          console.warn("Ascend: snapshot error", err);
+          setSyncStatus("err", "sync error");
+        });
+      });
+    } catch (e) {
+      console.warn("Ascend: firebase init failed", e);
+      setSyncStatus("err", "config error");
+    }
   }
 
   // ---------------------------------------------------------------------
@@ -717,4 +766,5 @@
   }
 
   renderAll();
+  initFirebase();
 })();
