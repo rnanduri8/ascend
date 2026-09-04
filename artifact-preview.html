@@ -1,0 +1,1644 @@
+<title>Ascend.</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#9679;</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   Ascend. — dark / minimalist / premium theme
+   ========================================================================== */
+
+:root {
+  --bg-0: #000000;
+  --bg-1: #050506;
+  --bg-2: #0a0a0b;
+  --bg-3: #101012;
+  --border: rgba(255,255,255,0.08);
+  --border-soft: rgba(255,255,255,0.05);
+  --text-0: #f2f2f3;
+  --text-1: #a8a8ad;
+  --text-2: #6e6e74;
+  --text-3: #47474c;
+  --accent: #ffffff;       /* monochrome — white is the only accent */
+  --accent-soft: rgba(255, 255, 255, 0.08);
+  --accent-2: #9a9aa0;     /* secondary muted accent */
+  --danger: #e5484d;
+  --success: #e7e7ea;
+  --radius: 18px;
+  --radius-sm: 10px;
+  --shadow-card: 0 1px 0 rgba(255,255,255,0.03) inset, 0 24px 48px -30px rgba(0,0,0,0.9);
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-0);
+  color: var(--text-0);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.bg-glow {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(700px 340px at 20% -8%, rgba(255,255,255,0.035), transparent 60%),
+    radial-gradient(600px 300px at 100% 5%, rgba(255,255,255,0.02), transparent 60%);
+}
+
+::selection { background: var(--accent-soft); color: var(--text-0); }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #2a2d38; }
+
+/* ---------------- Topbar ---------------- */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 28px;
+  background: rgba(5,6,10,0.85);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-mark { color: var(--accent); font-size: 14px; }
+.brand-name {
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  font-size: 13px;
+  color: var(--text-0);
+}
+
+.topbar-center { display: flex; align-items: center; gap: 10px; color: var(--text-1); font-size: 13px; }
+.today-date { font-family: var(--font-mono); color: var(--text-1); }
+.dot-sep { color: var(--text-3); }
+.streak-badge {
+  font-size: 12px;
+  color: var(--text-1);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.topbar-actions { display: flex; align-items: center; gap: 12px; }
+.sync-status {
+  font-size: 11px;
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+.sync-status.ok { color: var(--success); border-color: rgba(62,207,142,0.3); }
+.sync-status.err { color: var(--danger); border-color: rgba(229,72,77,0.3); }
+
+.icon-btn {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  color: var(--text-1);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  transition: all .15s ease;
+}
+.icon-btn:hover { color: var(--text-0); border-color: #2a2d38; background: var(--bg-3); }
+.icon-btn.btn-small { width: 26px; height: 26px; font-size: 13px; }
+
+/* ---------------- Board grid ---------------- */
+
+.board {
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 28px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 1080px) {
+  .board { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 720px) {
+  .board { grid-template-columns: 1fr; padding: 16px; gap: 14px; }
+  .topbar { padding: 14px 16px; }
+  .topbar-center { display: none; }
+}
+
+.card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  min-height: 280px;
+  overflow: hidden;
+  transition: border-color .2s ease, background-color .2s ease;
+}
+.card:hover { border-color: rgba(255,255,255,0.14); background: var(--bg-3); }
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.card-head h2 {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-0);
+  margin: 0;
+}
+.card-sub {
+  font-size: 12px;
+  color: var(--text-2);
+  font-family: var(--font-mono);
+}
+
+.card-body {
+  padding: 16px 18px 18px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: auto;
+}
+.card-body.no-pad { padding: 0; }
+.card-body.quote-body { justify-content: center; align-items: flex-start; gap: 14px; }
+
+/* ---------------- Forms / inputs ---------------- */
+
+.inline-form { display: flex; gap: 8px; }
+
+input[type="text"], input[type="number"], textarea {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  color: var(--text-0);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  outline: none;
+  width: 100%;
+  transition: border-color .15s ease;
+}
+input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
+  border-color: var(--accent);
+}
+input::placeholder, textarea::placeholder { color: var(--text-3); }
+
+.btn-add {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  color: var(--text-0);
+  width: 36px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 16px;
+  flex-shrink: 0;
+  transition: all .15s ease;
+}
+.btn-add:hover { background: var(--accent); color: #10110a; border-color: var(--accent); }
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-1);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn-ghost.btn-small { padding: 4px 10px; font-size: 11.5px; }
+.file-btn { display: inline-flex; align-items: center; }
+
+.btn-primary {
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  color: #14140d;
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: filter .15s ease;
+}
+.btn-primary:hover { filter: brightness(1.08); }
+
+/* ---------------- Checklist ---------------- */
+
+.check-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
+.check-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 13.5px;
+}
+.check-list li:last-child { border-bottom: none; }
+.check-list .check {
+  width: 17px; height: 17px;
+  border-radius: 5px;
+  border: 1.5px solid var(--text-3);
+  flex-shrink: 0;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s ease;
+  color: transparent;
+  font-size: 11px;
+}
+.check-list .check.done { background: var(--accent); border-color: var(--accent); color: #14140d; }
+.check-list .task-text { flex: 1; color: var(--text-0); word-break: break-word; }
+.check-list li.done .task-text { color: var(--text-3); text-decoration: line-through; }
+.check-list .del-btn {
+  opacity: 0; background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 13px;
+  transition: opacity .15s ease, color .15s ease;
+}
+.check-list li:hover .del-btn { opacity: 1; }
+.check-list .del-btn:hover { color: var(--danger); }
+.empty-hint { color: var(--text-3); font-size: 12.5px; padding: 10px 4px; }
+
+/* ---------------- Calendar ---------------- */
+
+.calendar-wrap { position: relative; width: 100%; height: 320px; }
+.calendar-wrap iframe { width: 100%; height: 100%; display: none; }
+.calendar-wrap.connected iframe { display: block; }
+.calendar-placeholder {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+  color: var(--text-2); font-size: 13px; text-align: center; padding: 20px;
+}
+.calendar-wrap.connected .calendar-placeholder { display: none; }
+
+/* ---------------- Tabs (goals) ---------------- */
+
+.tabs { display: flex; gap: 6px; }
+.tab {
+  background: transparent; border: 1px solid var(--border); color: var(--text-2);
+  padding: 4px 12px; border-radius: 999px; font-size: 11.5px; cursor: pointer; transition: all .15s ease;
+}
+.tab.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.hidden { display: none !important; }
+
+/* ---------------- Progress bars ---------------- */
+
+.progress-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 18px 10px;
+  align-content: start;
+}
+.progress-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  padding: 10px 4px 4px;
+  border-radius: var(--radius-sm);
+  transition: background-color .15s ease;
+}
+.progress-item:hover { background: var(--bg-3); }
+
+.progress-ring { position: relative; width: 92px; height: 92px; }
+.progress-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.progress-ring circle { fill: none; }
+.progress-ring .ring-track { stroke: var(--border); stroke-width: 7; }
+.progress-ring .ring-fill {
+  stroke: var(--text-0);
+  stroke-width: 7;
+  stroke-linecap: round;
+  transition: stroke-dashoffset .4s ease;
+}
+.progress-ring-label {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-0);
+}
+
+.progress-item-name { color: var(--text-0); font-weight: 500; font-size: 12.5px; text-align: center; line-height: 1.3; }
+.progress-item-val { color: var(--text-2); font-family: var(--font-mono); font-size: 10.5px; text-align: center; }
+
+.progress-controls { display: flex; gap: 6px; align-items: center; }
+.progress-controls button {
+  background: var(--bg-3); border: 1px solid var(--border); color: var(--text-1); width: 22px; height: 22px;
+  border-radius: 6px; cursor: pointer; font-size: 12px;
+}
+.progress-controls button:hover { color: var(--accent); border-color: var(--accent); }
+.progress-item .del-btn {
+  opacity: 0; position: absolute; top: 4px; right: 4px;
+  background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 11px;
+}
+.progress-item:hover .del-btn { opacity: 1; }
+.progress-item .del-btn:hover { color: var(--danger); }
+
+/* ---------------- Habit tracker ---------------- */
+
+.habit-grid { display: flex; flex-direction: column; }
+.habit-row {
+  display: grid;
+  grid-template-columns: 1fr repeat(7, 30px) 34px 20px;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.habit-row.head {
+  color: var(--text-3); font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em;
+  padding-top: 12px; padding-bottom: 8px;
+}
+.habit-row.head span { text-align: center; }
+.habit-name { font-size: 13px; color: var(--text-0); display: flex; align-items: center; gap: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.habit-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.habit-cell {
+  width: 26px; height: 26px; border-radius: 7px; border: 1px solid var(--border);
+  background: var(--bg-1); cursor: pointer; margin: 0 auto;
+  transition: all .12s ease;
+}
+.habit-cell.filled { border-color: transparent; }
+.habit-cell.today { box-shadow: 0 0 0 1.5px var(--accent) inset; }
+.habit-streak { font-family: var(--font-mono); font-size: 11px; color: var(--text-2); text-align: center; }
+.habit-del { background: none; border: none; color: var(--text-3); cursor: pointer; opacity: 0; }
+.habit-row:hover .habit-del { opacity: 1; }
+.habit-del:hover { color: var(--danger); }
+
+/* ---------------- Journal ---------------- */
+
+.card-journal textarea { flex: 1; min-height: 130px; resize: vertical; line-height: 1.5; }
+.journal-actions { display: flex; align-items: center; justify-content: space-between; }
+.save-hint { font-size: 11px; color: var(--text-3); }
+
+/* ---------------- Quote ---------------- */
+
+.quote-text {
+  font-size: 18px;
+  line-height: 1.45;
+  color: var(--text-0);
+  font-weight: 500;
+  margin: 0;
+  position: relative;
+  padding-left: 16px;
+  border-left: 2px solid var(--accent);
+}
+.quote-author { margin: 0; color: var(--text-2); font-size: 12.5px; font-family: var(--font-mono); padding-left: 18px; }
+
+/* ---------------- Reading ---------------- */
+
+.reading-tag {
+  align-self: flex-start;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+.reading-title { font-size: 15px; margin: 0; color: var(--text-0); }
+.reading-body { font-size: 13.5px; line-height: 1.6; color: var(--text-1); margin: 0; }
+.mark-read { font-size: 12px; color: var(--text-2); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+
+/* ---------------- Footer ---------------- */
+
+.board-footer {
+  text-align: center;
+  color: var(--text-3);
+  font-size: 11.5px;
+  padding: 10px 20px 30px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------------- Modals ---------------- */
+
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(2,2,4,0.7);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 420px;
+  max-height: 84vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 30px 60px -20px rgba(0,0,0,0.9);
+}
+.modal-wide { max-width: 600px; }
+.modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 18px; border-bottom: 1px solid var(--border-soft);
+}
+.modal-head h3 { margin: 0; font-size: 14px; color: var(--text-0); }
+.modal-body { padding: 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+.field-label { font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--text-2); margin: 10px 0 6px; }
+.field-label:first-child { margin-top: 0; }
+.field-hint { font-size: 11.5px; color: var(--text-3); margin: 6px 0 0; line-height: 1.5; }
+.settings-row { display: flex; gap: 8px; }
+
+.chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  border: 1px solid var(--border); color: var(--text-1); padding: 5px 12px; border-radius: 999px;
+  font-size: 12px; cursor: pointer; background: var(--bg-1); transition: all .15s ease;
+}
+.chip.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+.color-swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+.swatch { width: 26px; height: 26px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
+.swatch.active { border-color: var(--text-0); }
+
+/* Journal history */
+.journal-history-item { border-bottom: 1px solid var(--border-soft); padding: 10px 0; }
+.journal-history-date { font-family: var(--font-mono); font-size: 11.5px; color: var(--text-2); margin-bottom: 4px; }
+.journal-history-text { font-size: 13px; color: var(--text-1); line-height: 1.5; white-space: pre-wrap; }
+
+</style>
+
+<div class="bg-glow"></div>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">◆</span>
+    <span class="brand-name">ASCEND.</span>
+  </div>
+  <div class="topbar-center">
+    <span id="todayDate" class="today-date"></span>
+    <span class="dot-sep">·</span>
+    <span id="streakBadge" class="streak-badge">🔥 0 day streak</span>
+  </div>
+  <div class="topbar-actions">
+    <span id="syncStatus" class="sync-status" title="Cloud sync status">connecting…</span>
+    <button class="icon-btn" id="settingsBtn" title="Settings">⚙</button>
+  </div>
+</header>
+
+<main class="board">
+
+  <!-- ROW 1 -->
+  <section class="card card-tasks" data-card="tasks">
+    <div class="card-head">
+      <h2>Daily Task Planner</h2>
+      <span class="card-sub" id="taskProgressLabel">0/0</span>
+    </div>
+    <div class="card-body">
+      <form id="taskForm" class="inline-form">
+        <input type="text" id="taskInput" placeholder="Add a task for today…" autocomplete="off" />
+        <button type="submit" class="btn-add">+</button>
+      </form>
+      <ul id="taskList" class="check-list"></ul>
+    </div>
+  </section>
+
+  <section class="card card-calendar" data-card="calendar">
+    <div class="card-head">
+      <h2>Daily Calendar</h2>
+      <span class="card-sub">Google Calendar</span>
+    </div>
+    <div class="card-body no-pad">
+      <div id="calendarEmbedWrap" class="calendar-wrap">
+        <iframe id="calendarFrame" src="" style="border:0" frameborder="0" scrolling="no"></iframe>
+        <div id="calendarPlaceholder" class="calendar-placeholder">
+          <p>No calendar connected yet.</p>
+          <button class="btn-ghost" id="calendarSetupBtn">Connect Google Calendar</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card card-weekly" data-card="weekly">
+    <div class="card-head">
+      <h2>Weekly Goals</h2>
+      <span class="card-sub" id="weeklyProgressLabel">0/0</span>
+    </div>
+    <div class="card-body">
+      <form id="weeklyForm" class="inline-form">
+        <input type="text" id="weeklyInput" placeholder="Add a goal for this week…" autocomplete="off" />
+        <button type="submit" class="btn-add">+</button>
+      </form>
+      <ul id="weeklyList" class="check-list"></ul>
+    </div>
+  </section>
+
+  <!-- ROW 2 -->
+  <section class="card card-longgoals" data-card="longgoals">
+    <div class="card-head">
+      <h2>Monthly / Yearly Goals</h2>
+      <div class="tabs" id="goalTabs">
+        <button class="tab active" data-tab="monthly">Monthly</button>
+        <button class="tab" data-tab="yearly">Yearly</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <form id="monthlyForm" class="inline-form goal-pane" data-pane="monthly">
+        <input type="text" id="monthlyInput" placeholder="Add a monthly goal…" autocomplete="off" />
+        <button type="submit" class="btn-add">+</button>
+      </form>
+      <ul id="monthlyList" class="check-list goal-pane" data-pane="monthly"></ul>
+
+      <form id="yearlyForm" class="inline-form goal-pane hidden" data-pane="yearly">
+        <input type="text" id="yearlyInput" placeholder="Add a yearly goal…" autocomplete="off" />
+        <button type="submit" class="btn-add">+</button>
+      </form>
+      <ul id="yearlyList" class="check-list goal-pane hidden" data-pane="yearly"></ul>
+    </div>
+  </section>
+
+  <section class="card card-progress" data-card="progress">
+    <div class="card-head">
+      <h2>Visual Goal Progress</h2>
+      <button class="btn-ghost btn-small" id="addProgressGoalBtn">+ New</button>
+    </div>
+    <div class="card-body">
+      <div id="progressList" class="progress-list"></div>
+    </div>
+  </section>
+
+  <section class="card card-habits" data-card="habits">
+    <div class="card-head">
+      <h2>Habit Tracker</h2>
+      <button class="btn-ghost btn-small" id="addHabitBtn">+ New</button>
+    </div>
+    <div class="card-body no-pad">
+      <div id="habitGrid" class="habit-grid"></div>
+    </div>
+  </section>
+
+  <!-- ROW 3 -->
+  <section class="card card-journal" data-card="journal">
+    <div class="card-head">
+      <h2>Daily Journal</h2>
+      <span class="card-sub" id="journalSavedLabel"></span>
+    </div>
+    <div class="card-body">
+      <textarea id="journalText" placeholder="What's on your mind today?"></textarea>
+      <div class="journal-actions">
+        <button class="btn-ghost btn-small" id="journalHistoryBtn">History</button>
+        <span class="save-hint">Autosaves as you type</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card card-quote" data-card="quote">
+    <div class="card-head">
+      <h2>Daily Motivation</h2>
+      <button class="icon-btn btn-small" id="shuffleQuoteBtn" title="Another quote">⟳</button>
+    </div>
+    <div class="card-body quote-body">
+      <p id="quoteText" class="quote-text"></p>
+      <p id="quoteAuthor" class="quote-author"></p>
+    </div>
+  </section>
+
+  <section class="card card-reading" data-card="reading">
+    <div class="card-head">
+      <h2>Daily Reading</h2>
+      <button class="btn-ghost btn-small" id="readingInterestsBtn">Interests</button>
+    </div>
+    <div class="card-body">
+      <div class="reading-tag" id="readingTag"></div>
+      <h3 id="readingTitle" class="reading-title"></h3>
+      <p id="readingBody" class="reading-body"></p>
+      <div class="journal-actions">
+        <button class="btn-ghost btn-small" id="readingShuffleBtn">Another one</button>
+        <label class="mark-read"><input type="checkbox" id="readingDoneCheck" /> Mark as read</label>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="board-footer">
+  <span>Ascend. — built for the long game.</span>
+</footer>
+
+<!-- ===== Modals ===== -->
+
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Settings</h3><button class="icon-btn" data-close>✕</button></div>
+    <div class="modal-body">
+      <label class="field-label">Google Calendar embed URL</label>
+      <input type="text" id="calendarUrlInput" placeholder="https://calendar.google.com/calendar/embed?src=..." />
+      <p class="field-hint">Google Calendar → Settings → select your calendar → "Integrate calendar" → copy the "Embed code" src URL.</p>
+
+      <label class="field-label">Reading interests</label>
+      <div id="interestChecks" class="chip-group"></div>
+
+      <label class="field-label">Cloud sync</label>
+      <p class="field-hint" id="firebaseStatusText">Checking connection…</p>
+
+      <label class="field-label">Data</label>
+      <div class="settings-row">
+        <button class="btn-ghost btn-small" id="exportDataBtn">Export JSON</button>
+        <label class="btn-ghost btn-small file-btn">Import JSON<input type="file" id="importDataInput" accept="application/json" hidden /></label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="calendarModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Connect Google Calendar</h3><button class="icon-btn" data-close>✕</button></div>
+    <div class="modal-body">
+      <p class="field-hint">Paste the embed URL from Google Calendar's "Integrate calendar" settings page.</p>
+      <input type="text" id="calendarUrlInput2" placeholder="https://calendar.google.com/calendar/embed?src=..." />
+      <div class="settings-row" style="margin-top:14px;">
+        <button class="btn-primary" id="calendarSaveBtn">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="progressGoalModal">
+  <div class="modal">
+    <div class="modal-head"><h3>New Progress Goal</h3><button class="icon-btn" data-close>✕</button></div>
+    <div class="modal-body">
+      <label class="field-label">Goal name</label>
+      <input type="text" id="progressNameInput" placeholder="e.g. Read 24 books this year" />
+      <label class="field-label">Target value</label>
+      <input type="number" id="progressTargetInput" placeholder="e.g. 24" min="1" />
+      <label class="field-label">Unit (optional)</label>
+      <input type="text" id="progressUnitInput" placeholder="e.g. books" />
+      <div class="settings-row" style="margin-top:14px;">
+        <button class="btn-primary" id="progressSaveBtn">Create goal</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="habitModal">
+  <div class="modal">
+    <div class="modal-head"><h3>New Habit</h3><button class="icon-btn" data-close>✕</button></div>
+    <div class="modal-body">
+      <label class="field-label">Habit name</label>
+      <input type="text" id="habitNameInput" placeholder="e.g. Meditate, Read, Workout" />
+      <label class="field-label">Color</label>
+      <div class="color-swatches" id="habitColorSwatches"></div>
+      <div class="settings-row" style="margin-top:14px;">
+        <button class="btn-primary" id="habitSaveBtn">Create habit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="journalHistoryModal">
+  <div class="modal modal-wide">
+    <div class="modal-head"><h3>Journal History</h3><button class="icon-btn" data-close>✕</button></div>
+    <div class="modal-body" id="journalHistoryBody"></div>
+  </div>
+</div>
+
+<script>window.FIREBASE_CONFIG = { apiKey: "" };</script>
+<script>
+// ============================================================================
+// Ascend. — static content banks (quotes + reading snippets)
+// Pure data, no logic. Edit freely to add your own.
+// ============================================================================
+
+// "Dark-ish" motivation — blunt, unsentimental, discipline-forward.
+const QUOTES = [
+  { text: "Discipline is choosing between what you want now and what you want most.", author: "Abraham Lincoln" },
+  { text: "The obstacle in the path becomes the path. Never forget, within every obstacle is an opportunity to improve our condition.", author: "Ryan Holiday" },
+  { text: "You will not rise to the level of your goals. You will fall to the level of your systems.", author: "James Clear" },
+  { text: "Nobody is coming to save you. That's not pessimism — it's the beginning of self-reliance.", author: "Naval Ravikant" },
+  { text: "The pain of discipline weighs ounces. The pain of regret weighs tons.", author: "Jim Rohn" },
+  { text: "We suffer more in imagination than in reality.", author: "Seneca" },
+  { text: "The cave you fear to enter holds the treasure you seek.", author: "Joseph Campbell" },
+  { text: "It's not what happens to you, but how you react to it that matters.", author: "Epictetus" },
+  { text: "Comfort is the enemy of achievement.", author: "Farrah Gray" },
+  { text: "You have power over your mind — not outside events. Realize this, and you will find strength.", author: "Marcus Aurelius" },
+  { text: "The successful warrior is the average man, with laser-like focus.", author: "Bruce Lee" },
+  { text: "Hard choices, easy life. Easy choices, hard life.", author: "Jerzy Gregorek" },
+  { text: "What is not devoured by fire is hardened by it.", author: "Anonymous" },
+  { text: "Motivation is what gets you started. Habit is what keeps you going.", author: "Jim Ryun" },
+  { text: "Deserve victory.", author: "Ryan Holiday" },
+  { text: "Between stimulus and response there is a space. In that space is our power to choose our response.", author: "Viktor Frankl" },
+  { text: "Amateurs sit and wait for inspiration. The rest of us just get up and go to work.", author: "Steven Pressfield" },
+  { text: "The struggle you're in today is developing the strength you need for tomorrow. Don't wish it were easier — wish you were better.", author: "Jim Rohn" },
+  { text: "No one saves us but ourselves. No one can and no one may. We ourselves must walk the path.", author: "Buddha" },
+  { text: "You didn't come this far to only come this far.", author: "Anonymous" },
+  { text: "Ego is the enemy of what you want and of what you have: mastery, security, real knowledge of yourself.", author: "Ryan Holiday" },
+  { text: "Suffering is optional. Pain is inevitable, but the story you tell yourself about it is where suffering begins.", author: "Haruki Murakami (paraphrased)" },
+  { text: "The man who moves a mountain begins by carrying away small stones.", author: "Confucius" },
+  { text: "There is no easy way from the earth to the stars.", author: "Seneca" },
+  { text: "Fear is a reaction. Courage is a decision.", author: "Winston Churchill" },
+  { text: "You are what you repeatedly do. Excellence, then, is not an act, but a habit.", author: "Will Durant, on Aristotle" },
+  { text: "Whether you think you can or you think you can't, you're right.", author: "Henry Ford" },
+  { text: "The most painful thing is losing yourself in the process of loving someone else too much, and forgetting that you are special too.", author: "Ernest Hemingway" },
+  { text: "Get busy living or get busy dying.", author: "Stephen King" },
+  { text: "If you want something you've never had, you must be willing to do something you've never done.", author: "Thomas Jefferson" }
+];
+
+// Reading interest categories shown in Settings
+const READING_INTERESTS = [
+  "Stoicism",
+  "Discipline & Habits",
+  "Leadership",
+  "Business Strategy",
+  "Productivity",
+  "Financial Mindset",
+  "Mental Toughness",
+  "Deep Work / Focus"
+];
+
+// Short (~150-250 word) teaching snippets, tagged by interest.
+// These are original short essays inspired by the ideas in each tradition —
+// not excerpts from copyrighted books.
+const READING_BANK = [
+  {
+    id: "r1", tags: ["Stoicism", "Mental Toughness"],
+    title: "The Dichotomy of Control",
+    body: "Every morning, before anything demands your attention, draw a line down the middle of what the day will bring. On one side: your judgments, your effort, your reactions — entirely yours. On the other: the traffic, the market, other people's opinions, the weather — never yours, no matter how much you insist otherwise. The Stoics didn't preach indifference to the world; they preached precision about where your energy actually does anything. Most anxiety is spent renovating the wrong side of that line. Today, before you react to anything, ask: is this mine to control? If not, note it and move on. If it is, act — fully, without waiting for permission or certainty."
+  },
+  {
+    id: "r2", tags: ["Discipline & Habits", "Productivity"],
+    title: "Systems Beat Goals",
+    body: "A goal is a direction. A system is what actually moves you. The person who says 'I want to write a book' and the person who says 'I write 300 words every morning before checking my phone' are aiming at the same outcome, but only one of them has removed the decision from the equation. Willpower is a depleting resource; a system is a standing order you gave your past self so your present self doesn't have to negotiate every day. The fastest way to improve any area of your life is not to want it more — it's to make the desired behavior the path of least resistance, and the undesired one require friction."
+  },
+  {
+    id: "r3", tags: ["Leadership"],
+    title: "Authority Is Borrowed, Not Owned",
+    body: "Titles grant permission to lead; they don't grant the ability. The moment a team stops believing a leader's decisions are made in good faith — for the mission, not for the leader's comfort — authority becomes hollow, enforced rather than followed. Real leadership is a loan renewed daily by consistency: doing the hard, unglamorous thing when no one's measuring it, admitting error before being caught in it, protecting the team's time as fiercely as your own. The leaders people would follow into difficulty are rarely the loudest in the room — they're the ones whose word has never once needed a disclaimer."
+  },
+  {
+    id: "r4", tags: ["Business Strategy"],
+    title: "Moats Are Verbs, Not Nouns",
+    body: "A competitive advantage isn't a wall you build once — it's an action you repeat faster or better than anyone else can copy. Patents expire, brand fades, first-mover advantage evaporates the moment a well-funded competitor decides to care. What compounds is a *process*: how quickly you learn from customers, how cheaply you can experiment, how tightly your team is aligned on what not to do. Ask less 'what protects us' and more 'what are we doing every week that a competitor would need years to replicate, even with our exact playbook in hand.'"
+  },
+  {
+    id: "r5", tags: ["Productivity", "Deep Work / Focus"],
+    title: "Attention Is the Last Scarce Resource",
+    body: "Time is finite but at least it's honest — a day is always 24 hours. Attention is finite and dishonest: it can be technically 'available' while being functionally useless, fragmented across seven tabs and a phone buzzing in the next room. The professionals who produce disproportionate output aren't working more hours than everyone else; they've simply refused to let their best hours become communal property. Block time before the day claims it for you. An unprotected calendar is a calendar other people's priorities will fill by default."
+  },
+  {
+    id: "r6", tags: ["Financial Mindset"],
+    title: "Enough Is a Number, Not a Feeling",
+    body: "The single most dangerous idea in personal finance is that more will eventually feel like enough. It won't, structurally — because the reference point moves with the income. The people who escape the treadmill are the ones who define 'enough' in advance, in writing, before the number arrives, so a future version of themselves can't renegotiate the definition under the influence of a bigger paycheck. Wealth is not what you accumulate; it's the gap between what you earn and what you spend, held open on purpose."
+  },
+  {
+    id: "r7", tags: ["Mental Toughness", "Discipline & Habits"],
+    title: "The Comfort Crisis Is Self-Inflicted",
+    body: "Physical discomfort used to be unavoidable — cold, hunger, exertion were defaults, not choices. Now they're optional, and most people opt out entirely, then wonder why their capacity to handle hard things has quietly eroded. Deliberately choosing manageable discomfort — a hard workout, a cold shower, a fast, a long walk with no phone — isn't about the specific activity. It's rehearsal. You're proving to your nervous system, on your own terms, that discomfort is survivable and temporary, so that when hardship arrives uninvited, it meets a person who has practiced this before."
+  },
+  {
+    id: "r8", tags: ["Stoicism"],
+    title: "Premeditatio Malorum",
+    body: "The Stoics practiced imagining loss in advance — not to court anxiety, but to inoculate against it and to sharpen gratitude for what's still present. Picture, briefly and deliberately, the job ending, the health faltering, the relationship changing. Not to dwell — to notice how much of your current peace you've been taking for granted, and to rehearse the response you'd want to have if it happened. This isn't pessimism; pessimism expects the worst and stops there. This is preparation: expect that anything can end, and let that fact make you more present with it while it hasn't."
+  },
+  {
+    id: "r9", tags: ["Deep Work / Focus", "Business Strategy"],
+    title: "Say No At The Strategy Level, Not The Task Level",
+    body: "Most people try to protect their time by declining individual requests as they arrive — a losing, exhausting game, because each one arrives dressed as reasonable. The better move is to decide, in advance and out loud, what you are not doing this quarter. A stated strategy ('we are not entering that market,' 'I am not taking on client work below X') turns a hundred future negotiations into a single past decision. Strategy is mostly the art of preemptive refusal."
+  },
+  {
+    id: "r10", tags: ["Leadership", "Mental Toughness"],
+    title: "Composure Is a Force Multiplier",
+    body: "In any group under pressure, people unconsciously calibrate their own alarm to whoever seems most in control. This means a leader's visible composure isn't cosmetic — it is, functionally, the team's shared nervous system regulator. You don't have to feel calm to provide it; you have to act as if the situation, however bad, is still within the range of things you've handled before. The skill isn't suppressing fear. It's metabolizing it fast enough that it never becomes anyone else's problem but yours."
+  },
+  {
+    id: "r11", tags: ["Financial Mindset", "Discipline & Habits"],
+    title: "Automate the Virtue",
+    body: "Nobody consistently 'decides' to save money every month with equal enthusiasm — motivation is too unreliable a foundation for a 30-year plan. The people who build wealth quietly are the ones who removed the decision: automatic transfers the day the paycheck lands, before the money is visible enough to negotiate with. The same principle scales to every good habit you're relying on willpower for. If a behavior matters for decades, it shouldn't depend on how you feel on a given Tuesday."
+  },
+  {
+    id: "r12", tags: ["Productivity", "Business Strategy"],
+    title: "The Cost of a Decision Is Not the Decision",
+    body: "Most delayed decisions aren't delayed because more information is coming — they're delayed because the decision-maker is avoiding the discomfort of being wrong in public. But the real cost of most decisions isn't the decision itself; it's the weeks spent circling it while the option set quietly narrows. Set a deadline for the decision before you have all the facts you'd like to have. A good decision made on time beats a perfect decision made too late to matter."
+  }
+];
+
+</script>
+<script>
+// ============================================================================
+// Ascend. — application logic
+// Vanilla JS. Firebase Firestore (optional) + localStorage cache.
+// ============================================================================
+
+(function () {
+  "use strict";
+
+  // ---------------------------------------------------------------------
+  // Date helpers
+  // ---------------------------------------------------------------------
+  function pad(n) { return n < 10 ? "0" + n : "" + n; }
+  function dateKey(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function monthKey(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1); }
+  function yearKey(d) { return "" + d.getFullYear(); }
+  function weekKey(d) {
+    // ISO-ish: Monday of the current week, as a date key
+    const copy = new Date(d);
+    const day = (copy.getDay() + 6) % 7; // 0 = Monday
+    copy.setDate(copy.getDate() - day);
+    return dateKey(copy);
+  }
+  function startOfWeek(d) {
+    const copy = new Date(d);
+    const day = (copy.getDay() + 6) % 7;
+    copy.setDate(copy.getDate() - day);
+    copy.setHours(0, 0, 0, 0);
+    return copy;
+  }
+  function addDays(d, n) { const c = new Date(d); c.setDate(c.getDate() + n); return c; }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+
+  const TODAY = new Date();
+  const TODAY_KEY = dateKey(TODAY);
+  const WEEK_KEY = weekKey(TODAY);
+  const MONTH_KEY = monthKey(TODAY);
+  const YEAR_KEY = yearKey(TODAY);
+
+  // Simple deterministic hash so "today's" quote/reading is stable all day
+  // but different from other days, without needing server logic.
+  function dayHash(key, mod) {
+    let h = 0;
+    for (let i = 0; i < key.length; i++) { h = (h * 31 + key.charCodeAt(i)) >>> 0; }
+    return h % mod;
+  }
+
+  // ---------------------------------------------------------------------
+  // State
+  // ---------------------------------------------------------------------
+  const LS_KEY = "ascend_state_v1";
+
+  function defaultState() {
+    return {
+      tasks: {},
+      weeklyGoals: {},
+      monthlyGoals: {},
+      yearlyGoals: {},
+      progressGoals: [],
+      habits: [],
+      habitLogs: {},
+      journal: {},
+      calendarUrl: "",
+      interests: ["Stoicism", "Discipline & Habits", "Productivity"],
+      readingState: {},
+      quoteState: {}
+    };
+  }
+
+  let state = loadLocal() || defaultState();
+  let saveTimer = null;
+  let firestoreDoc = null; // set once Firebase is ready
+  let applyingRemote = false; // guards against write-loop when snapshot arrives
+
+  function loadLocal() {
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return Object.assign(defaultState(), parsed);
+    } catch (e) { return null; }
+  }
+
+  function saveLocal() {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) { /* ignore quota errors */ }
+  }
+
+  function persist() {
+    saveLocal();
+    if (applyingRemote) return; // don't echo remote-triggered renders back up
+    if (!firestoreDoc) return;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () {
+      firestoreDoc.set(state, { merge: false }).catch(function (err) {
+        console.warn("Ascend: cloud save failed", err);
+        setSyncStatus("err", "sync error");
+      });
+    }, 500);
+  }
+
+  // ---------------------------------------------------------------------
+  // Firebase (optional — falls back to localStorage-only silently)
+  // ---------------------------------------------------------------------
+  const syncStatusEl = document.getElementById("syncStatus");
+  function setSyncStatus(cls, text) {
+    syncStatusEl.className = "sync-status " + cls;
+    syncStatusEl.textContent = text;
+  }
+
+  function initFirebase() {
+    const cfg = window.FIREBASE_CONFIG;
+    const configured = cfg && cfg.apiKey && cfg.projectId;
+    if (!configured) {
+      setSyncStatus("", "local only");
+      document.getElementById("firebaseStatusText").textContent =
+        "Not connected — data is saved to this browser only. Add your Firebase config in js/firebase-config.js to sync across devices.";
+      return;
+    }
+    try {
+      firebase.initializeApp(cfg);
+      setSyncStatus("", "connecting…");
+      firebase.auth().signInAnonymously().catch(function (err) {
+        console.warn("Ascend: auth failed", err);
+        setSyncStatus("err", "auth error");
+      });
+      firebase.auth().onAuthStateChanged(function (user) {
+        if (!user) return;
+        const db = firebase.firestore();
+        firestoreDoc = db.collection("users").doc(user.uid);
+        document.getElementById("firebaseStatusText").textContent =
+          "Connected — syncing to Firestore (user " + user.uid.slice(0, 8) + "…).";
+        firestoreDoc.onSnapshot(function (snap) {
+          if (!snap.exists) {
+            // first run for this user — push current (likely local) state up
+            firestoreDoc.set(state).catch(function () {});
+            setSyncStatus("ok", "synced");
+            return;
+          }
+          applyingRemote = true;
+          state = Object.assign(defaultState(), snap.data());
+          saveLocal();
+          renderAll();
+          applyingRemote = false;
+          setSyncStatus("ok", "synced");
+        }, function (err) {
+          console.warn("Ascend: snapshot error", err);
+          setSyncStatus("err", "sync error");
+        });
+      });
+    } catch (e) {
+      console.warn("Ascend: firebase init failed", e);
+      setSyncStatus("err", "config error");
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // Generic checklist helper (tasks / weekly / monthly / yearly goals)
+  // ---------------------------------------------------------------------
+  function renderChecklist(listEl, items, labelEl, onToggle, onDelete) {
+    listEl.innerHTML = "";
+    if (!items || items.length === 0) {
+      const li = document.createElement("li");
+      li.className = "empty-hint";
+      li.textContent = "Nothing yet — add one above.";
+      listEl.appendChild(li);
+    } else {
+      items.forEach(function (item) {
+        const li = document.createElement("li");
+        if (item.done) li.classList.add("done");
+
+        const check = document.createElement("button");
+        check.className = "check" + (item.done ? " done" : "");
+        check.textContent = "✓";
+        check.addEventListener("click", function () { onToggle(item.id); });
+
+        const text = document.createElement("span");
+        text.className = "task-text";
+        text.textContent = item.text;
+
+        const del = document.createElement("button");
+        del.className = "del-btn";
+        del.textContent = "✕";
+        del.addEventListener("click", function () { onDelete(item.id); });
+
+        li.appendChild(check);
+        li.appendChild(text);
+        li.appendChild(del);
+        listEl.appendChild(li);
+      });
+    }
+    if (labelEl) {
+      const done = (items || []).filter(function (i) { return i.done; }).length;
+      labelEl.textContent = done + "/" + (items || []).length;
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // Daily Task Planner
+  // ---------------------------------------------------------------------
+  const taskForm = document.getElementById("taskForm");
+  const taskInput = document.getElementById("taskInput");
+  const taskList = document.getElementById("taskList");
+  const taskProgressLabel = document.getElementById("taskProgressLabel");
+
+  function getTasks() { return state.tasks[TODAY_KEY] || []; }
+  function setTasks(arr) { state.tasks[TODAY_KEY] = arr; persist(); }
+
+  function renderTasks() {
+    renderChecklist(taskList, getTasks(), taskProgressLabel,
+      function toggle(id) {
+        setTasks(getTasks().map(function (t) { return t.id === id ? Object.assign({}, t, { done: !t.done }) : t; }));
+        renderTasks(); updateStreak();
+      },
+      function del(id) {
+        setTasks(getTasks().filter(function (t) { return t.id !== id; }));
+        renderTasks(); updateStreak();
+      });
+  }
+
+  taskForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    const val = taskInput.value.trim();
+    if (!val) return;
+    setTasks(getTasks().concat([{ id: uid(), text: val, done: false }]));
+    taskInput.value = "";
+    renderTasks();
+  });
+
+  // ---------------------------------------------------------------------
+  // Weekly Goals
+  // ---------------------------------------------------------------------
+  const weeklyForm = document.getElementById("weeklyForm");
+  const weeklyInput = document.getElementById("weeklyInput");
+  const weeklyList = document.getElementById("weeklyList");
+  const weeklyProgressLabel = document.getElementById("weeklyProgressLabel");
+
+  function getWeekly() { return state.weeklyGoals[WEEK_KEY] || []; }
+  function setWeekly(arr) { state.weeklyGoals[WEEK_KEY] = arr; persist(); }
+
+  function renderWeekly() {
+    renderChecklist(weeklyList, getWeekly(), weeklyProgressLabel,
+      function toggle(id) {
+        setWeekly(getWeekly().map(function (g) { return g.id === id ? Object.assign({}, g, { done: !g.done }) : g; }));
+        renderWeekly();
+      },
+      function del(id) {
+        setWeekly(getWeekly().filter(function (g) { return g.id !== id; }));
+        renderWeekly();
+      });
+  }
+
+  weeklyForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    const val = weeklyInput.value.trim();
+    if (!val) return;
+    setWeekly(getWeekly().concat([{ id: uid(), text: val, done: false }]));
+    weeklyInput.value = "";
+    renderWeekly();
+  });
+
+  // ---------------------------------------------------------------------
+  // Monthly / Yearly Goals (tabbed)
+  // ---------------------------------------------------------------------
+  const monthlyForm = document.getElementById("monthlyForm");
+  const monthlyInput = document.getElementById("monthlyInput");
+  const monthlyList = document.getElementById("monthlyList");
+  const yearlyForm = document.getElementById("yearlyForm");
+  const yearlyInput = document.getElementById("yearlyInput");
+  const yearlyList = document.getElementById("yearlyList");
+  const goalTabs = document.getElementById("goalTabs");
+
+  function getMonthly() { return state.monthlyGoals[MONTH_KEY] || []; }
+  function setMonthly(arr) { state.monthlyGoals[MONTH_KEY] = arr; persist(); }
+  function getYearly() { return state.yearlyGoals[YEAR_KEY] || []; }
+  function setYearly(arr) { state.yearlyGoals[YEAR_KEY] = arr; persist(); }
+
+  function renderMonthly() {
+    renderChecklist(monthlyList, getMonthly(), null,
+      function toggle(id) { setMonthly(getMonthly().map(function (g) { return g.id === id ? Object.assign({}, g, { done: !g.done }) : g; })); renderMonthly(); },
+      function del(id) { setMonthly(getMonthly().filter(function (g) { return g.id !== id; })); renderMonthly(); });
+  }
+  function renderYearly() {
+    renderChecklist(yearlyList, getYearly(), null,
+      function toggle(id) { setYearly(getYearly().map(function (g) { return g.id === id ? Object.assign({}, g, { done: !g.done }) : g; })); renderYearly(); },
+      function del(id) { setYearly(getYearly().filter(function (g) { return g.id !== id; })); renderYearly(); });
+  }
+
+  monthlyForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    const val = monthlyInput.value.trim();
+    if (!val) return;
+    setMonthly(getMonthly().concat([{ id: uid(), text: val, done: false }]));
+    monthlyInput.value = ""; renderMonthly();
+  });
+  yearlyForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    const val = yearlyInput.value.trim();
+    if (!val) return;
+    setYearly(getYearly().concat([{ id: uid(), text: val, done: false }]));
+    yearlyInput.value = ""; renderYearly();
+  });
+
+  goalTabs.addEventListener("click", function (e) {
+    const btn = e.target.closest(".tab");
+    if (!btn) return;
+    const tab = btn.dataset.tab;
+    goalTabs.querySelectorAll(".tab").forEach(function (t) { t.classList.toggle("active", t === btn); });
+    document.querySelectorAll(".goal-pane").forEach(function (p) { p.classList.toggle("hidden", p.dataset.pane !== tab); });
+  });
+
+  // ---------------------------------------------------------------------
+  // Visual Goal Progress
+  // ---------------------------------------------------------------------
+  const progressList = document.getElementById("progressList");
+  const addProgressGoalBtn = document.getElementById("addProgressGoalBtn");
+  const progressGoalModal = document.getElementById("progressGoalModal");
+  const progressNameInput = document.getElementById("progressNameInput");
+  const progressTargetInput = document.getElementById("progressTargetInput");
+  const progressUnitInput = document.getElementById("progressUnitInput");
+  const progressSaveBtn = document.getElementById("progressSaveBtn");
+
+  function renderProgress() {
+    progressList.innerHTML = "";
+    if (!state.progressGoals.length) {
+      const p = document.createElement("p");
+      p.className = "empty-hint";
+      p.textContent = "No progress goals yet. Click + New to add one (e.g. \"Read 24 books this year\").";
+      progressList.appendChild(p);
+      return;
+    }
+    const RADIUS = 39;
+    const CIRC = 2 * Math.PI * RADIUS;
+
+    state.progressGoals.forEach(function (g) {
+      const pct = g.target > 0 ? Math.min(100, Math.round((g.current / g.target) * 100)) : 0;
+      const offset = CIRC - (pct / 100) * CIRC;
+
+      const wrap = document.createElement("div");
+      wrap.className = "progress-item";
+
+      const del = document.createElement("button");
+      del.className = "del-btn"; del.textContent = "✕"; del.title = "Delete goal";
+      del.addEventListener("click", function () { deleteProgressGoal(g.id); });
+      wrap.appendChild(del);
+
+      const ring = document.createElement("div");
+      ring.className = "progress-ring";
+      ring.innerHTML =
+        '<svg viewBox="0 0 92 92">' +
+          '<circle class="ring-track" cx="46" cy="46" r="' + RADIUS + '"></circle>' +
+          '<circle class="ring-fill" cx="46" cy="46" r="' + RADIUS + '" ' +
+            'stroke-dasharray="' + CIRC.toFixed(2) + '" ' +
+            'stroke-dashoffset="' + offset.toFixed(2) + '"></circle>' +
+        '</svg>';
+      const label = document.createElement("span");
+      label.className = "progress-ring-label";
+      label.textContent = pct + "%";
+      ring.appendChild(label);
+      wrap.appendChild(ring);
+
+      const name = document.createElement("div");
+      name.className = "progress-item-name";
+      name.textContent = g.name;
+      wrap.appendChild(name);
+
+      const val = document.createElement("div");
+      val.className = "progress-item-val";
+      val.textContent = g.current + " / " + g.target + (g.unit ? " " + g.unit : "");
+      wrap.appendChild(val);
+
+      const controls = document.createElement("div");
+      controls.className = "progress-controls";
+      const minus = document.createElement("button"); minus.textContent = "–";
+      minus.addEventListener("click", function () { updateProgressGoal(g.id, -1); });
+      const plus = document.createElement("button"); plus.textContent = "+";
+      plus.addEventListener("click", function () { updateProgressGoal(g.id, 1); });
+      controls.appendChild(minus); controls.appendChild(plus);
+      wrap.appendChild(controls);
+
+      progressList.appendChild(wrap);
+    });
+  }
+
+  function updateProgressGoal(id, delta) {
+    state.progressGoals = state.progressGoals.map(function (g) {
+      if (g.id !== id) return g;
+      const next = Math.max(0, Math.min(g.target, g.current + delta));
+      return Object.assign({}, g, { current: next });
+    });
+    persist(); renderProgress();
+  }
+  function deleteProgressGoal(id) {
+    state.progressGoals = state.progressGoals.filter(function (g) { return g.id !== id; });
+    persist(); renderProgress();
+  }
+
+  addProgressGoalBtn.addEventListener("click", function () {
+    progressNameInput.value = ""; progressTargetInput.value = ""; progressUnitInput.value = "";
+    openModal(progressGoalModal);
+  });
+  progressSaveBtn.addEventListener("click", function () {
+    const name = progressNameInput.value.trim();
+    const target = parseFloat(progressTargetInput.value);
+    if (!name || !target || target <= 0) return;
+    state.progressGoals.push({ id: uid(), name: name, target: target, current: 0, unit: progressUnitInput.value.trim() });
+    persist(); renderProgress(); closeModal(progressGoalModal);
+  });
+
+  // ---------------------------------------------------------------------
+  // Habit Tracker
+  // ---------------------------------------------------------------------
+  const habitGrid = document.getElementById("habitGrid");
+  const addHabitBtn = document.getElementById("addHabitBtn");
+  const habitModal = document.getElementById("habitModal");
+  const habitNameInput = document.getElementById("habitNameInput");
+  const habitSaveBtn = document.getElementById("habitSaveBtn");
+  const habitColorSwatches = document.getElementById("habitColorSwatches");
+  const HABIT_COLORS = ["#d4af37", "#6b8afd", "#3ecf8e", "#e5484d", "#c084fc", "#f59e0b"];
+  let selectedHabitColor = HABIT_COLORS[0];
+
+  HABIT_COLORS.forEach(function (c, i) {
+    const sw = document.createElement("div");
+    sw.className = "swatch" + (i === 0 ? " active" : "");
+    sw.style.background = c;
+    sw.addEventListener("click", function () {
+      selectedHabitColor = c;
+      habitColorSwatches.querySelectorAll(".swatch").forEach(function (s) { s.classList.remove("active"); });
+      sw.classList.add("active");
+    });
+    habitColorSwatches.appendChild(sw);
+  });
+
+  function weekDates() {
+    const start = startOfWeek(TODAY);
+    const days = [];
+    for (let i = 0; i < 7; i++) days.push(addDays(start, i));
+    return days;
+  }
+  function logKey(habitId, dKey) { return habitId + "|" + dKey; }
+  function isLogged(habitId, dKey) { return !!state.habitLogs[logKey(habitId, dKey)]; }
+  function toggleLog(habitId, dKey) {
+    const k = logKey(habitId, dKey);
+    if (state.habitLogs[k]) delete state.habitLogs[k]; else state.habitLogs[k] = true;
+    persist();
+  }
+  function habitStreak(habitId) {
+    let streak = 0;
+    let cursor = new Date(TODAY);
+    // if today not logged yet, start counting from yesterday so an unbroken
+    // streak isn't reset to 0 just because the day isn't over
+    if (!isLogged(habitId, dateKey(cursor))) cursor = addDays(cursor, -1);
+    while (isLogged(habitId, dateKey(cursor))) { streak++; cursor = addDays(cursor, -1); }
+    return streak;
+  }
+
+  function renderHabits() {
+    habitGrid.innerHTML = "";
+    const days = weekDates();
+    const dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
+
+    const head = document.createElement("div");
+    head.className = "habit-row head";
+    head.appendChild(document.createElement("span"));
+    dayLabels.forEach(function (l) { const s = document.createElement("span"); s.textContent = l; head.appendChild(s); });
+    const streakHead = document.createElement("span"); streakHead.textContent = "🔥";
+    head.appendChild(streakHead);
+    head.appendChild(document.createElement("span"));
+    habitGrid.appendChild(head);
+
+    if (!state.habits.length) {
+      const empty = document.createElement("p");
+      empty.className = "empty-hint";
+      empty.style.padding = "4px 18px 16px";
+      empty.textContent = "No habits yet. Click + New to start tracking one.";
+      habitGrid.appendChild(empty);
+      return;
+    }
+
+    state.habits.forEach(function (habit) {
+      const row = document.createElement("div");
+      row.className = "habit-row";
+
+      const nameWrap = document.createElement("div");
+      nameWrap.className = "habit-name";
+      const dot = document.createElement("span");
+      dot.className = "habit-dot";
+      dot.style.background = habit.color;
+      const nameText = document.createElement("span");
+      nameText.textContent = habit.name;
+      nameWrap.appendChild(dot); nameWrap.appendChild(nameText);
+      row.appendChild(nameWrap);
+
+      days.forEach(function (d) {
+        const dKey = dateKey(d);
+        const cell = document.createElement("button");
+        cell.className = "habit-cell" + (isLogged(habit.id, dKey) ? " filled" : "") + (dKey === TODAY_KEY ? " today" : "");
+        if (isLogged(habit.id, dKey)) cell.style.background = habit.color;
+        cell.addEventListener("click", function () {
+          toggleLog(habit.id, dKey);
+          renderHabits();
+          updateStreak();
+        });
+        row.appendChild(cell);
+      });
+
+      const streakEl = document.createElement("span");
+      streakEl.className = "habit-streak";
+      streakEl.textContent = habitStreak(habit.id);
+      row.appendChild(streakEl);
+
+      const delBtn = document.createElement("button");
+      delBtn.className = "habit-del";
+      delBtn.textContent = "✕";
+      delBtn.title = "Delete habit";
+      delBtn.addEventListener("click", function () {
+        state.habits = state.habits.filter(function (h) { return h.id !== habit.id; });
+        persist(); renderHabits();
+      });
+      row.appendChild(delBtn);
+
+      habitGrid.appendChild(row);
+    });
+  }
+
+  addHabitBtn.addEventListener("click", function () {
+    habitNameInput.value = "";
+    selectedHabitColor = HABIT_COLORS[0];
+    habitColorSwatches.querySelectorAll(".swatch").forEach(function (s, i) { s.classList.toggle("active", i === 0); });
+    openModal(habitModal);
+  });
+  habitSaveBtn.addEventListener("click", function () {
+    const name = habitNameInput.value.trim();
+    if (!name) return;
+    state.habits.push({ id: uid(), name: name, color: selectedHabitColor });
+    persist(); renderHabits(); closeModal(habitModal);
+  });
+
+  // ---------------------------------------------------------------------
+  // Daily Journal
+  // ---------------------------------------------------------------------
+  const journalText = document.getElementById("journalText");
+  const journalSavedLabel = document.getElementById("journalSavedLabel");
+  const journalHistoryBtn = document.getElementById("journalHistoryBtn");
+  const journalHistoryModal = document.getElementById("journalHistoryModal");
+  const journalHistoryBody = document.getElementById("journalHistoryBody");
+  let journalDebounce = null;
+
+  function renderJournal() {
+    journalText.value = state.journal[TODAY_KEY] || "";
+  }
+  journalText.addEventListener("input", function () {
+    clearTimeout(journalDebounce);
+    journalDebounce = setTimeout(function () {
+      state.journal[TODAY_KEY] = journalText.value;
+      persist();
+      journalSavedLabel.textContent = "saved " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }, 400);
+  });
+  journalHistoryBtn.addEventListener("click", function () {
+    journalHistoryBody.innerHTML = "";
+    const keys = Object.keys(state.journal).filter(function (k) { return state.journal[k] && state.journal[k].trim(); }).sort().reverse();
+    if (!keys.length) {
+      journalHistoryBody.innerHTML = '<p class="empty-hint">No journal entries yet.</p>';
+    } else {
+      keys.forEach(function (k) {
+        const item = document.createElement("div");
+        item.className = "journal-history-item";
+        const d = document.createElement("div"); d.className = "journal-history-date"; d.textContent = k;
+        const t = document.createElement("div"); t.className = "journal-history-text"; t.textContent = state.journal[k];
+        item.appendChild(d); item.appendChild(t);
+        journalHistoryBody.appendChild(item);
+      });
+    }
+    openModal(journalHistoryModal);
+  });
+
+  // ---------------------------------------------------------------------
+  // Daily Motivation Quote
+  // ---------------------------------------------------------------------
+  const quoteText = document.getElementById("quoteText");
+  const quoteAuthor = document.getElementById("quoteAuthor");
+  const shuffleQuoteBtn = document.getElementById("shuffleQuoteBtn");
+
+  function renderQuote() {
+    let idx = state.quoteState[TODAY_KEY];
+    if (idx === undefined) { idx = dayHash(TODAY_KEY, QUOTES.length); state.quoteState[TODAY_KEY] = idx; persist(); }
+    const q = QUOTES[idx % QUOTES.length];
+    quoteText.textContent = "“" + q.text + "”";
+    quoteAuthor.textContent = "— " + q.author;
+  }
+  shuffleQuoteBtn.addEventListener("click", function () {
+    const current = state.quoteState[TODAY_KEY];
+    let next = Math.floor(Math.random() * QUOTES.length);
+    if (next === current && QUOTES.length > 1) next = (next + 1) % QUOTES.length;
+    state.quoteState[TODAY_KEY] = next;
+    persist(); renderQuote();
+  });
+
+  // ---------------------------------------------------------------------
+  // Daily Reading
+  // ---------------------------------------------------------------------
+  const readingTag = document.getElementById("readingTag");
+  const readingTitle = document.getElementById("readingTitle");
+  const readingBody = document.getElementById("readingBody");
+  const readingShuffleBtn = document.getElementById("readingShuffleBtn");
+  const readingDoneCheck = document.getElementById("readingDoneCheck");
+  const readingInterestsBtn = document.getElementById("readingInterestsBtn");
+  const interestChecks = document.getElementById("interestChecks");
+
+  function matchingReadings() {
+    const active = state.interests || [];
+    const matched = READING_BANK.filter(function (r) { return r.tags.some(function (t) { return active.indexOf(t) !== -1; }); });
+    return matched.length ? matched : READING_BANK;
+  }
+
+  function currentReadingEntry() {
+    const saved = state.readingState[TODAY_KEY];
+    const pool = matchingReadings();
+    if (saved && pool.some(function (r) { return r.id === saved.id; })) {
+      return { entry: pool.filter(function (r) { return r.id === saved.id; })[0], done: !!saved.done };
+    }
+    const idx = dayHash(TODAY_KEY, pool.length);
+    const entry = pool[idx];
+    state.readingState[TODAY_KEY] = { id: entry.id, done: false };
+    persist();
+    return { entry: entry, done: false };
+  }
+
+  function renderReading() {
+    const cur = currentReadingEntry();
+    readingTag.textContent = cur.entry.tags[0];
+    readingTitle.textContent = cur.entry.title;
+    readingBody.textContent = cur.entry.body;
+    readingDoneCheck.checked = cur.done;
+  }
+  readingShuffleBtn.addEventListener("click", function () {
+    const pool = matchingReadings();
+    const current = state.readingState[TODAY_KEY] ? state.readingState[TODAY_KEY].id : null;
+    let candidate = pool[Math.floor(Math.random() * pool.length)];
+    if (pool.length > 1) { while (candidate.id === current) candidate = pool[Math.floor(Math.random() * pool.length)]; }
+    state.readingState[TODAY_KEY] = { id: candidate.id, done: false };
+    persist(); renderReading();
+  });
+  readingDoneCheck.addEventListener("change", function () {
+    const rs = state.readingState[TODAY_KEY] || {};
+    rs.done = readingDoneCheck.checked;
+    state.readingState[TODAY_KEY] = rs;
+    persist(); updateStreak();
+  });
+
+  function renderInterestChips() {
+    interestChecks.innerHTML = "";
+    READING_INTERESTS.forEach(function (topic) {
+      const chip = document.createElement("div");
+      chip.className = "chip" + (state.interests.indexOf(topic) !== -1 ? " active" : "");
+      chip.textContent = topic;
+      chip.addEventListener("click", function () {
+        const idx = state.interests.indexOf(topic);
+        if (idx === -1) state.interests.push(topic); else state.interests.splice(idx, 1);
+        persist();
+        chip.classList.toggle("active");
+        delete state.readingState[TODAY_KEY];
+        renderReading();
+      });
+      interestChecks.appendChild(chip);
+    });
+  }
+  readingInterestsBtn.addEventListener("click", function () { openModal(document.getElementById("settingsModal")); });
+
+  // ---------------------------------------------------------------------
+  // Daily Calendar
+  // ---------------------------------------------------------------------
+  const calendarFrame = document.getElementById("calendarFrame");
+  const calendarWrap = document.getElementById("calendarEmbedWrap");
+  const calendarSetupBtn = document.getElementById("calendarSetupBtn");
+  const calendarModal = document.getElementById("calendarModal");
+  const calendarUrlInput = document.getElementById("calendarUrlInput");
+  const calendarUrlInput2 = document.getElementById("calendarUrlInput2");
+  const calendarSaveBtn = document.getElementById("calendarSaveBtn");
+
+  function renderCalendar() {
+    if (state.calendarUrl) {
+      calendarFrame.src = state.calendarUrl;
+      calendarWrap.classList.add("connected");
+    } else {
+      calendarWrap.classList.remove("connected");
+    }
+    calendarUrlInput.value = state.calendarUrl || "";
+  }
+  function saveCalendarUrl(url) {
+    state.calendarUrl = url.trim();
+    persist(); renderCalendar();
+  }
+  calendarSetupBtn.addEventListener("click", function () {
+    calendarUrlInput2.value = state.calendarUrl || "";
+    openModal(calendarModal);
+  });
+  calendarSaveBtn.addEventListener("click", function () {
+    saveCalendarUrl(calendarUrlInput2.value);
+    closeModal(calendarModal);
+  });
+  calendarUrlInput.addEventListener("change", function () { saveCalendarUrl(calendarUrlInput.value); });
+
+  // ---------------------------------------------------------------------
+  // Streak badge (top bar) — consecutive days with any habit logged
+  // or, if no habits exist yet, any task completed
+  // ---------------------------------------------------------------------
+  const streakBadge = document.getElementById("streakBadge");
+  function updateStreak() {
+    let best = 0;
+    if (state.habits.length) {
+      state.habits.forEach(function (h) { best = Math.max(best, habitStreak(h.id)); });
+    } else {
+      // fallback: streak of days with at least one completed task
+      let streak = 0; let cursor = new Date(TODAY);
+      function dayHasCompletedTask(dKey) { return (state.tasks[dKey] || []).some(function (t) { return t.done; }); }
+      if (!dayHasCompletedTask(dateKey(cursor))) cursor = addDays(cursor, -1);
+      while (dayHasCompletedTask(dateKey(cursor))) { streak++; cursor = addDays(cursor, -1); }
+      best = streak;
+    }
+    streakBadge.textContent = "🔥 " + best + " day" + (best === 1 ? "" : "s") + " streak";
+  }
+
+  // ---------------------------------------------------------------------
+  // Modals (generic open/close)
+  // ---------------------------------------------------------------------
+  function openModal(el) { el.classList.add("open"); }
+  function closeModal(el) { el.classList.remove("open"); }
+  document.querySelectorAll(".modal-overlay").forEach(function (overlay) {
+    overlay.addEventListener("click", function (e) { if (e.target === overlay) closeModal(overlay); });
+    overlay.querySelectorAll("[data-close]").forEach(function (btn) { btn.addEventListener("click", function () { closeModal(overlay); }); });
+  });
+  document.getElementById("settingsBtn").addEventListener("click", function () { openModal(document.getElementById("settingsModal")); });
+
+  // ---------------------------------------------------------------------
+  // Export / Import
+  // ---------------------------------------------------------------------
+  document.getElementById("exportDataBtn").addEventListener("click", function () {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "ascend-backup-" + TODAY_KEY + ".json";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+  document.getElementById("importDataInput").addEventListener("change", function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function () {
+      try {
+        const parsed = JSON.parse(reader.result);
+        state = Object.assign(defaultState(), parsed);
+        persist(); renderAll();
+      } catch (err) { alert("Could not read that file — make sure it's a Ascend. export."); }
+    };
+    reader.readAsText(file);
+  });
+
+  // ---------------------------------------------------------------------
+  // Top bar date
+  // ---------------------------------------------------------------------
+  document.getElementById("todayDate").textContent = TODAY.toLocaleDateString(undefined, {
+    weekday: "long", year: "numeric", month: "long", day: "numeric"
+  });
+
+  // ---------------------------------------------------------------------
+  // Render everything
+  // ---------------------------------------------------------------------
+  function renderAll() {
+    renderTasks();
+    renderWeekly();
+    renderMonthly();
+    renderYearly();
+    renderProgress();
+    renderHabits();
+    renderJournal();
+    renderQuote();
+    renderInterestChips();
+    renderReading();
+    renderCalendar();
+    updateStreak();
+  }
+
+  renderAll();
+  initFirebase();
+})();
+
+</script>

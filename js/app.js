@@ -327,27 +327,45 @@
       progressList.appendChild(p);
       return;
     }
+    const RADIUS = 39;
+    const CIRC = 2 * Math.PI * RADIUS;
+
     state.progressGoals.forEach(function (g) {
       const pct = g.target > 0 ? Math.min(100, Math.round((g.current / g.target) * 100)) : 0;
+      const offset = CIRC - (pct / 100) * CIRC;
+
       const wrap = document.createElement("div");
       wrap.className = "progress-item";
 
-      const head = document.createElement("div");
-      head.className = "progress-item-head";
-      const name = document.createElement("span");
+      const del = document.createElement("button");
+      del.className = "del-btn"; del.textContent = "✕"; del.title = "Delete goal";
+      del.addEventListener("click", function () { deleteProgressGoal(g.id); });
+      wrap.appendChild(del);
+
+      const ring = document.createElement("div");
+      ring.className = "progress-ring";
+      ring.innerHTML =
+        '<svg viewBox="0 0 92 92">' +
+          '<circle class="ring-track" cx="46" cy="46" r="' + RADIUS + '"></circle>' +
+          '<circle class="ring-fill" cx="46" cy="46" r="' + RADIUS + '" ' +
+            'stroke-dasharray="' + CIRC.toFixed(2) + '" ' +
+            'stroke-dashoffset="' + offset.toFixed(2) + '"></circle>' +
+        '</svg>';
+      const label = document.createElement("span");
+      label.className = "progress-ring-label";
+      label.textContent = pct + "%";
+      ring.appendChild(label);
+      wrap.appendChild(ring);
+
+      const name = document.createElement("div");
       name.className = "progress-item-name";
       name.textContent = g.name;
-      const val = document.createElement("span");
-      val.className = "progress-item-val";
-      val.textContent = g.current + " / " + g.target + (g.unit ? " " + g.unit : "") + " · " + pct + "%";
-      head.appendChild(name); head.appendChild(val);
+      wrap.appendChild(name);
 
-      const track = document.createElement("div");
-      track.className = "progress-track";
-      const fill = document.createElement("div");
-      fill.className = "progress-fill";
-      fill.style.width = pct + "%";
-      track.appendChild(fill);
+      const val = document.createElement("div");
+      val.className = "progress-item-val";
+      val.textContent = g.current + " / " + g.target + (g.unit ? " " + g.unit : "");
+      wrap.appendChild(val);
 
       const controls = document.createElement("div");
       controls.className = "progress-controls";
@@ -355,11 +373,9 @@
       minus.addEventListener("click", function () { updateProgressGoal(g.id, -1); });
       const plus = document.createElement("button"); plus.textContent = "+";
       plus.addEventListener("click", function () { updateProgressGoal(g.id, 1); });
-      const del = document.createElement("button"); del.className = "del-btn"; del.textContent = "✕";
-      del.addEventListener("click", function () { deleteProgressGoal(g.id); });
-      controls.appendChild(minus); controls.appendChild(plus); controls.appendChild(del);
+      controls.appendChild(minus); controls.appendChild(plus);
+      wrap.appendChild(controls);
 
-      wrap.appendChild(head); wrap.appendChild(track); wrap.appendChild(controls);
       progressList.appendChild(wrap);
     });
   }

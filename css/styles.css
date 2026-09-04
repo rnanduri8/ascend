@@ -3,24 +3,24 @@
    ========================================================================== */
 
 :root {
-  --bg-0: #05060a;
-  --bg-1: #0a0b10;
-  --bg-2: #0f1117;
-  --bg-3: #15171f;
-  --border: #1f212b;
-  --border-soft: #191b23;
-  --text-0: #f4f4f6;
-  --text-1: #b8bac2;
-  --text-2: #7d7f8a;
-  --text-3: #52545e;
-  --accent: #d4af37;      /* muted gold — premium accent */
-  --accent-soft: rgba(212, 175, 55, 0.14);
-  --accent-2: #6b8afd;    /* cool secondary accent for links/info */
+  --bg-0: #000000;
+  --bg-1: #050506;
+  --bg-2: #0a0a0b;
+  --bg-3: #101012;
+  --border: rgba(255,255,255,0.08);
+  --border-soft: rgba(255,255,255,0.05);
+  --text-0: #f2f2f3;
+  --text-1: #a8a8ad;
+  --text-2: #6e6e74;
+  --text-3: #47474c;
+  --accent: #ffffff;       /* monochrome — white is the only accent */
+  --accent-soft: rgba(255, 255, 255, 0.08);
+  --accent-2: #9a9aa0;     /* secondary muted accent */
   --danger: #e5484d;
-  --success: #3ecf8e;
-  --radius: 14px;
-  --radius-sm: 9px;
-  --shadow-card: 0 1px 0 rgba(255,255,255,0.02) inset, 0 20px 40px -24px rgba(0,0,0,0.8);
+  --success: #e7e7ea;
+  --radius: 18px;
+  --radius-sm: 10px;
+  --shadow-card: 0 1px 0 rgba(255,255,255,0.03) inset, 0 24px 48px -30px rgba(0,0,0,0.9);
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
@@ -48,8 +48,8 @@ body {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(600px 300px at 15% -5%, rgba(212,175,55,0.06), transparent 60%),
-    radial-gradient(500px 260px at 100% 10%, rgba(107,138,253,0.05), transparent 60%);
+    radial-gradient(700px 340px at 20% -8%, rgba(255,255,255,0.035), transparent 60%),
+    radial-gradient(600px 300px at 100% 5%, rgba(255,255,255,0.02), transparent 60%);
 }
 
 ::selection { background: var(--accent-soft); color: var(--text-0); }
@@ -147,7 +147,7 @@ body {
 }
 
 .card {
-  background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+  background: var(--bg-2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow-card);
@@ -155,9 +155,9 @@ body {
   flex-direction: column;
   min-height: 280px;
   overflow: hidden;
-  transition: border-color .2s ease;
+  transition: border-color .2s ease, background-color .2s ease;
 }
-.card:hover { border-color: #26293380; }
+.card:hover { border-color: rgba(255,255,255,0.14); background: var(--bg-3); }
 
 .card-head {
   display: flex;
@@ -310,20 +310,56 @@ input::placeholder, textarea::placeholder { color: var(--text-3); }
 
 /* ---------------- Progress bars ---------------- */
 
-.progress-list { display: flex; flex-direction: column; gap: 16px; }
-.progress-item { display: flex; flex-direction: column; gap: 6px; }
-.progress-item-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; }
-.progress-item-name { color: var(--text-0); font-weight: 500; }
-.progress-item-val { color: var(--text-2); font-family: var(--font-mono); font-size: 11.5px; }
-.progress-track { height: 8px; background: var(--bg-1); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
-.progress-fill { height: 100%; background: linear-gradient(90deg, #8a6d1e, var(--accent)); border-radius: 999px; transition: width .3s ease; }
+.progress-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 18px 10px;
+  align-content: start;
+}
+.progress-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  padding: 10px 4px 4px;
+  border-radius: var(--radius-sm);
+  transition: background-color .15s ease;
+}
+.progress-item:hover { background: var(--bg-3); }
+
+.progress-ring { position: relative; width: 92px; height: 92px; }
+.progress-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.progress-ring circle { fill: none; }
+.progress-ring .ring-track { stroke: var(--border); stroke-width: 7; }
+.progress-ring .ring-fill {
+  stroke: var(--text-0);
+  stroke-width: 7;
+  stroke-linecap: round;
+  transition: stroke-dashoffset .4s ease;
+}
+.progress-ring-label {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-0);
+}
+
+.progress-item-name { color: var(--text-0); font-weight: 500; font-size: 12.5px; text-align: center; line-height: 1.3; }
+.progress-item-val { color: var(--text-2); font-family: var(--font-mono); font-size: 10.5px; text-align: center; }
+
 .progress-controls { display: flex; gap: 6px; align-items: center; }
 .progress-controls button {
   background: var(--bg-3); border: 1px solid var(--border); color: var(--text-1); width: 22px; height: 22px;
   border-radius: 6px; cursor: pointer; font-size: 12px;
 }
 .progress-controls button:hover { color: var(--accent); border-color: var(--accent); }
-.progress-item .del-btn { opacity: 0; background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 12px; }
+.progress-item .del-btn {
+  opacity: 0; position: absolute; top: 4px; right: 4px;
+  background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 11px;
+}
 .progress-item:hover .del-btn { opacity: 1; }
 .progress-item .del-btn:hover { color: var(--danger); }
 
