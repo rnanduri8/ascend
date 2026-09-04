@@ -106,6 +106,28 @@
     syncStatusEl.textContent = text;
   }
 
+  // Loads a <script> tag and resolves once it fires load/error, so the three
+  // Firebase SDK files (which depend on load order) can be chained without
+  // ever blocking the rest of the page — this only ever runs when a real
+  // Firebase config is present, so the default (unconfigured) app makes no
+  // network request to gstatic.com at all.
+  function loadScript(src) {
+    return new Promise(function (resolve, reject) {
+      const s = document.createElement("script");
+      s.src = src;
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error("failed to load " + src)); };
+      document.head.appendChild(s);
+    });
+  }
+
+  function loadFirebaseSdk() {
+    const base = "https://www.gstatic.com/firebasejs/10.14.1/";
+    return loadScript(base + "firebase-app-compat.js")
+      .then(function () { return loadScript(base + "firebase-auth-compat.js"); })
+      .then(function () { return loadScript(base + "firebase-firestore-compat.js"); });
+  }
+
   function initFirebase() {
     const cfg = window.FIREBASE_CONFIG;
     const configured = cfg && cfg.apiKey && cfg.projectId;
@@ -115,41 +137,48 @@
         "Not connected — data is saved to this browser only. Add your Firebase config in js/firebase-config.js to sync across devices.";
       return;
     }
-    try {
-      firebase.initializeApp(cfg);
-      setSyncStatus("", "connecting…");
-      firebase.auth().signInAnonymously().catch(function (err) {
-        console.warn("Ascend: auth failed", err);
-        setSyncStatus("err", "auth error");
-      });
-      firebase.auth().onAuthStateChanged(function (user) {
-        if (!user) return;
-        const db = firebase.firestore();
-        firestoreDoc = db.collection("users").doc(user.uid);
-        document.getElementById("firebaseStatusText").textContent =
-          "Connected — syncing to Firestore (user " + user.uid.slice(0, 8) + "…).";
-        firestoreDoc.onSnapshot(function (snap) {
-          if (!snap.exists) {
-            // first run for this user — push current (likely local) state up
-            firestoreDoc.set(state).catch(function () {});
-            setSyncStatus("ok", "synced");
-            return;
-          }
-          applyingRemote = true;
-          state = Object.assign(defaultState(), snap.data());
-          saveLocal();
-          renderAll();
-          applyingRemote = false;
-          setSyncStatus("ok", "synced");
-        }, function (err) {
-          console.warn("Ascend: snapshot error", err);
-          setSyncStatus("err", "sync error");
+    setSyncStatus("", "connecting…");
+    loadFirebaseSdk().then(function () {
+      try {
+        firebase.initializeApp(cfg);
+        firebase.auth().signInAnonymously().catch(function (err) {
+          console.warn("Ascend: auth failed", err);
+          setSyncStatus("err", "auth error");
         });
-      });
-    } catch (e) {
-      console.warn("Ascend: firebase init failed", e);
-      setSyncStatus("err", "config error");
-    }
+        firebase.auth().onAuthStateChanged(function (user) {
+          if (!user) return;
+          const db = firebase.firestore();
+          firestoreDoc = db.collection("users").doc(user.uid);
+          document.getElementById("firebaseStatusText").textContent =
+            "Connected — syncing to Firestore (user " + user.uid.slice(0, 8) + "…).";
+          firestoreDoc.onSnapshot(function (snap) {
+            if (!snap.exists) {
+              // first run for this user — push current (likely local) state up
+              firestoreDoc.set(state).catch(function () {});
+              setSyncStatus("ok", "synced");
+              return;
+            }
+            applyingRemote = true;
+            state = Object.assign(defaultState(), snap.data());
+            saveLocal();
+            renderAll();
+            applyingRemote = false;
+            setSyncStatus("ok", "synced");
+          }, function (err) {
+            console.warn("Ascend: snapshot error", err);
+            setSyncStatus("err", "sync error");
+          });
+        });
+      } catch (e) {
+        console.warn("Ascend: firebase init failed", e);
+        setSyncStatus("err", "config error");
+      }
+    }).catch(function (err) {
+      console.warn("Ascend: firebase SDK failed to load", err);
+      setSyncStatus("err", "offline");
+      document.getElementById("firebaseStatusText").textContent =
+        "Couldn't reach Firebase — working locally for now. Your data is safe in this browser and will sync once the connection is back.";
+    });
   }
 
   // ---------------------------------------------------------------------

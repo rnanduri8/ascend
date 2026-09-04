@@ -1,8 +1,4 @@
 <title>Ascend.</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#9679;</text></svg>">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ==========================================================================
    Ascend. — premium dark design system
@@ -558,9 +554,20 @@ input::placeholder, textarea::placeholder { color: var(--text-faint); }
 
 </style>
 
+
+
+
+
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#9679;</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+
+
+
 <div class="bg-glow"></div>
 
-<header class="topbar">
+
   <div class="topbar-row">
     <div class="brand">
       <span class="brand-mark">◆</span>
@@ -579,7 +586,7 @@ input::placeholder, textarea::placeholder { color: var(--text-faint); }
     <span id="todayDate" class="greeting-sub"></span>
   </div>
   <div id="summaryStrip" class="summary-strip"></div>
-</header>
+
 
 <main class="board">
 
@@ -818,7 +825,29 @@ input::placeholder, textarea::placeholder { color: var(--text-faint); }
   </div>
 </div>
 
-<script>window.FIREBASE_CONFIG = { apiKey: "" };</script>
+<!-- Firebase's SDK is loaded dynamically from app.js, only when a config is
+     present in js/firebase-config.js — so with no config (the default),
+     this page never makes a network request to gstatic.com at all. That
+     avoids a slow/blocked CDN request ever holding up the rest of the app. -->
+<script>
+  // Visible fallback if app.js fails for any reason, instead of a silent
+  // blank/stuck page with no clue what went wrong.
+  window.addEventListener("error", function (e) {
+    if (document.getElementById("ascendErrorBanner")) return;
+    const banner = document.createElement("div");
+    banner.id = "ascendErrorBanner";
+    banner.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:999;background:#3a1414;color:#ffd7d7;font:12px/1.5 monospace;padding:10px 16px;border-bottom:1px solid #a33;";
+    banner.textContent = "Ascend. hit a script error and may not be fully interactive: " + (e.message || "unknown error") + " — check the browser console for details.";
+    document.body.appendChild(banner);
+  });
+</script>
+
+
+
+<script>
+const FIREBASE_CONFIG = { apiKey: "" };
+window.FIREBASE_CONFIG = FIREBASE_CONFIG;
+</script>
 <script>
 // ============================================================================
 // Ascend. — static content banks (quotes + reading snippets)
@@ -1061,6 +1090,28 @@ const READING_BANK = [
     syncStatusEl.textContent = text;
   }
 
+  // Loads a <script> tag and resolves once it fires load/error, so the three
+  // Firebase SDK files (which depend on load order) can be chained without
+  // ever blocking the rest of the page — this only ever runs when a real
+  // Firebase config is present, so the default (unconfigured) app makes no
+  // network request to gstatic.com at all.
+  function loadScript(src) {
+    return new Promise(function (resolve, reject) {
+      const s = document.createElement("script");
+      s.src = src;
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error("failed to load " + src)); };
+      document.head.appendChild(s);
+    });
+  }
+
+  function loadFirebaseSdk() {
+    const base = "https://www.gstatic.com/firebasejs/10.14.1/";
+    return loadScript(base + "firebase-app-compat.js")
+      .then(function () { return loadScript(base + "firebase-auth-compat.js"); })
+      .then(function () { return loadScript(base + "firebase-firestore-compat.js"); });
+  }
+
   function initFirebase() {
     const cfg = window.FIREBASE_CONFIG;
     const configured = cfg && cfg.apiKey && cfg.projectId;
@@ -1070,41 +1121,48 @@ const READING_BANK = [
         "Not connected — data is saved to this browser only. Add your Firebase config in js/firebase-config.js to sync across devices.";
       return;
     }
-    try {
-      firebase.initializeApp(cfg);
-      setSyncStatus("", "connecting…");
-      firebase.auth().signInAnonymously().catch(function (err) {
-        console.warn("Ascend: auth failed", err);
-        setSyncStatus("err", "auth error");
-      });
-      firebase.auth().onAuthStateChanged(function (user) {
-        if (!user) return;
-        const db = firebase.firestore();
-        firestoreDoc = db.collection("users").doc(user.uid);
-        document.getElementById("firebaseStatusText").textContent =
-          "Connected — syncing to Firestore (user " + user.uid.slice(0, 8) + "…).";
-        firestoreDoc.onSnapshot(function (snap) {
-          if (!snap.exists) {
-            // first run for this user — push current (likely local) state up
-            firestoreDoc.set(state).catch(function () {});
-            setSyncStatus("ok", "synced");
-            return;
-          }
-          applyingRemote = true;
-          state = Object.assign(defaultState(), snap.data());
-          saveLocal();
-          renderAll();
-          applyingRemote = false;
-          setSyncStatus("ok", "synced");
-        }, function (err) {
-          console.warn("Ascend: snapshot error", err);
-          setSyncStatus("err", "sync error");
+    setSyncStatus("", "connecting…");
+    loadFirebaseSdk().then(function () {
+      try {
+        firebase.initializeApp(cfg);
+        firebase.auth().signInAnonymously().catch(function (err) {
+          console.warn("Ascend: auth failed", err);
+          setSyncStatus("err", "auth error");
         });
-      });
-    } catch (e) {
-      console.warn("Ascend: firebase init failed", e);
-      setSyncStatus("err", "config error");
-    }
+        firebase.auth().onAuthStateChanged(function (user) {
+          if (!user) return;
+          const db = firebase.firestore();
+          firestoreDoc = db.collection("users").doc(user.uid);
+          document.getElementById("firebaseStatusText").textContent =
+            "Connected — syncing to Firestore (user " + user.uid.slice(0, 8) + "…).";
+          firestoreDoc.onSnapshot(function (snap) {
+            if (!snap.exists) {
+              // first run for this user — push current (likely local) state up
+              firestoreDoc.set(state).catch(function () {});
+              setSyncStatus("ok", "synced");
+              return;
+            }
+            applyingRemote = true;
+            state = Object.assign(defaultState(), snap.data());
+            saveLocal();
+            renderAll();
+            applyingRemote = false;
+            setSyncStatus("ok", "synced");
+          }, function (err) {
+            console.warn("Ascend: snapshot error", err);
+            setSyncStatus("err", "sync error");
+          });
+        });
+      } catch (e) {
+        console.warn("Ascend: firebase init failed", e);
+        setSyncStatus("err", "config error");
+      }
+    }).catch(function (err) {
+      console.warn("Ascend: firebase SDK failed to load", err);
+      setSyncStatus("err", "offline");
+      document.getElementById("firebaseStatusText").textContent =
+        "Couldn't reach Firebase — working locally for now. Your data is safe in this browser and will sync once the connection is back.";
+    });
   }
 
   // ---------------------------------------------------------------------
