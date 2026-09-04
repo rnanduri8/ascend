@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ascend.</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#9679;</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<div class="bg-glow"></div>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">◆</span>
+    <span class="brand-name">ASCEND.</span>
+  </div>
+  <div class="topbar-center">
+    <span id="todayDate" class="today-date"></span>
+    <span class="dot-sep">·</span>
+    <span id="streakBadge" class="streak-badge">🔥 0 day streak</span>
+  </div>
+  <div class="topbar-actions">
+    <span id="syncStatus" class="sync-status" title="This browser's storage">saved locally</span>
+    <button class="icon-btn" id="settingsBtn" title="Settings">⚙</button>
+  </div>
+</header>
+
+<main class="board">
+
+  <!-- ROW 1 -->
+  <section class="card card-tasks" data-card="tasks">
+    <div class="card-head">
+      <h2>Daily Task Planner</h2>
+      <span class="card-sub" id="taskProgressLabel">0/0</span>
+    </div>
+    <div class="card-body">
+      <form id="taskForm" class="inline-form">
+        <input type="text" id="taskInput" placeholder="Add a task for today…" autocomplete="off" />
+        <button type="submit" class="btn-add">+</button>
+      </form>
+      <ul id="taskList" class="check-list"></ul>
+    </div>
+  </section>
+
+  <section class="card card-calendar" data-card="calendar">
+    <div class="card-head">
+      <h2>Daily Calendar</h2>
+      <span class="card-sub">Google Calendar</span>
+    </div>
+    <div class="card-body no-pad">
+      <div id="calendarEmbedWrap" class="calendar-wrap">
+        <iframe id="calendarFrame" src="" style="border:0" frameborder="0" scrolling="no"></iframe>
+        <div id="calendarPlaceholder" class="calendar-placeholder">
+          <p>No calendar connected yet.</p>
+          <button class="btn-ghost" id="calendarSetupBtn">Connect Google Calendar</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card card-weekly" data-card="weekly">
+    <div class="card-head">
+      <h2>Weekly Goals</h2>
+      <span class="card-sub" id="weeklyProgressLabel">0/0</span>
+    </div>
+    <div class="card-body">
+      <form id="weeklyForm" class="inline-form">
+        <input type="text" id="weeklyInput" placeholder="Add a goal for this week…" autocomplete="off" />
+        <button type="submit" class="btn-add">+</button>
+      </form>
+      <ul id="weeklyList" class="check-list"></ul>
+    </div>
+  </section>
+
+  <!-- ROW 2 -->
+  <section class="card card-longgoals" data-card="longgoals">
+    <div class="card-head">
+      <h2>Monthly / Yearly Goals</h2>
+      <div class="tabs" id="goalTabs">
+        <button class="tab active" data-tab="monthly">Monthly</button>
+        <button class="tab" data-tab="yearly">Yearly</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <form id="monthlyForm" class="inline-form goal-pane" data-pane="monthly">
+        <input type="text" id="monthlyInput" placeholder="Add a monthly goal…" autocomplete="off" />
+        <button type="submit" class="btn-add">+</button>
+      </form>
+      <ul id="monthlyList" class="check-list goal-pane" data-pane="monthly"></ul>
+
+      <form id="yearlyForm" class="inline-form goal-pane hidden" data-pane="yearly">
+        <input type="text" id="yearlyInput" placeholder="Add a yearly goal…" autocomplete="off" />
+        <button type="submit" class="btn-add">+</button>
+      </form>
+      <ul id="yearlyList" class="check-list goal-pane hidden" data-pane="yearly"></ul>
+    </div>
+  </section>
+
+  <section class="card card-progress" data-card="progress">
+    <div class="card-head">
+      <h2>Visual Goal Progress</h2>
+      <button class="btn-ghost btn-small" id="addProgressGoalBtn">+ New</button>
+    </div>
+    <div class="card-body">
+      <div id="progressList" class="progress-list"></div>
+    </div>
+  </section>
+
+  <section class="card card-habits" data-card="habits">
+    <div class="card-head">
+      <h2>Habit Tracker</h2>
+      <button class="btn-ghost btn-small" id="addHabitBtn">+ New</button>
+    </div>
+    <div class="card-body no-pad">
+      <div id="habitGrid" class="habit-grid"></div>
+    </div>
+  </section>
+
+  <!-- ROW 3 -->
+  <section class="card card-journal" data-card="journal">
+    <div class="card-head">
+      <h2>Daily Journal</h2>
+      <span class="card-sub" id="journalSavedLabel"></span>
+    </div>
+    <div class="card-body">
+      <textarea id="journalText" placeholder="What's on your mind today?"></textarea>
+      <div class="journal-actions">
+        <button class="btn-ghost btn-small" id="journalHistoryBtn">History</button>
+        <span class="save-hint">Autosaves as you type</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card card-quote" data-card="quote">
+    <div class="card-head">
+      <h2>Daily Motivation</h2>
+      <button class="icon-btn btn-small" id="shuffleQuoteBtn" title="Another quote">⟳</button>
+    </div>
+    <div class="card-body quote-body">
+      <p id="quoteText" class="quote-text"></p>
+      <p id="quoteAuthor" class="quote-author"></p>
+    </div>
+  </section>
+
+  <section class="card card-reading" data-card="reading">
+    <div class="card-head">
+      <h2>Daily Reading</h2>
+      <button class="btn-ghost btn-small" id="readingInterestsBtn">Interests</button>
+    </div>
+    <div class="card-body">
+      <div class="reading-tag" id="readingTag"></div>
+      <h3 id="readingTitle" class="reading-title"></h3>
+      <p id="readingBody" class="reading-body"></p>
+      <div class="journal-actions">
+        <button class="btn-ghost btn-small" id="readingShuffleBtn">Another one</button>
+        <label class="mark-read"><input type="checkbox" id="readingDoneCheck" /> Mark as read</label>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="board-footer">
+  <span>Ascend. — built for the long game.</span>
+</footer>
+
+<!-- ===== Modals ===== -->
+
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Settings</h3><button class="icon-btn" data-close>✕</button></div>
+    <div class="modal-body">
+      <label class="field-label">Google Calendar embed URL</label>
+      <input type="text" id="calendarUrlInput" placeholder="https://calendar.google.com/calendar/embed?src=..." />
+      <p class="field-hint">Google Calendar → Settings → select your calendar → "Integrate calendar" → copy the "Embed code" src URL.</p>
+
+      <label class="field-label">Reading interests</label>
+      <div id="interestChecks" class="chip-group"></div>
+
+      <label class="field-label">Data</label>
+      <p class="field-hint">Everything is saved to this browser only (localStorage) — no account, no server. Export a backup regularly, especially before clearing browser data or switching devices.</p>
+      <div class="settings-row">
+        <button class="btn-ghost btn-small" id="exportDataBtn">Export JSON</button>
+        <label class="btn-ghost btn-small file-btn">Import JSON<input type="file" id="importDataInput" accept="application/json" hidden /></label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="calendarModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Connect Google Calendar</h3><button class="icon-btn" data-close>✕</button></div>
+    <div class="modal-body">
+      <p class="field-hint">Paste the embed URL from Google Calendar's "Integrate calendar" settings page.</p>
+      <input type="text" id="calendarUrlInput2" placeholder="https://calendar.google.com/calendar/embed?src=..." />
+      <div class="settings-row" style="margin-top:14px;">
+        <button class="btn-primary" id="calendarSaveBtn">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="progressGoalModal">
+  <div class="modal">
+    <div class="modal-head"><h3>New Progress Goal</h3><button class="icon-btn" data-close>✕</button></div>
+    <div class="modal-body">
+      <label class="field-label">Goal name</label>
+      <input type="text" id="progressNameInput" placeholder="e.g. Read 24 books this year" />
+      <label class="field-label">Target value</label>
+      <input type="number" id="progressTargetInput" placeholder="e.g. 24" min="1" />
+      <label class="field-label">Unit (optional)</label>
+      <input type="text" id="progressUnitInput" placeholder="e.g. books" />
+      <div class="settings-row" style="margin-top:14px;">
+        <button class="btn-primary" id="progressSaveBtn">Create goal</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="habitModal">
+  <div class="modal">
+    <div class="modal-head"><h3>New Habit</h3><button class="icon-btn" data-close>✕</button></div>
+    <div class="modal-body">
+      <label class="field-label">Habit name</label>
+      <input type="text" id="habitNameInput" placeholder="e.g. Meditate, Read, Workout" />
+      <label class="field-label">Color</label>
+      <div class="color-swatches" id="habitColorSwatches"></div>
+      <div class="settings-row" style="margin-top:14px;">
+        <button class="btn-primary" id="habitSaveBtn">Create habit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="journalHistoryModal">
+  <div class="modal modal-wide">
+    <div class="modal-head"><h3>Journal History</h3><button class="icon-btn" data-close>✕</button></div>
+    <div class="modal-body" id="journalHistoryBody"></div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
