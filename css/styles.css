@@ -390,35 +390,76 @@ input::placeholder, textarea::placeholder { color: var(--text-faint); }
 .calendar-daystrip-cell.selected { background: var(--accent-soft); }
 .calendar-daystrip-cell.selected .calendar-daystrip-num { color: var(--text-primary); }
 
+/* All-day events strip */
+.calendar-allday {
+  display: flex; flex-wrap: wrap; gap: 5px;
+  padding: 0 18px 8px;
+}
+.calendar-allday-chip {
+  font-size: 11px; color: var(--text-primary);
+  background: var(--accent-soft);
+  border-radius: 6px;
+  padding: 3px 8px;
+}
+
 /* Day-view hourly agenda */
 .calendar-agenda {
   flex: 1;
   overflow-y: auto;
   padding: 2px 18px 4px;
-  position: relative;
-}
-.calendar-agenda-row {
-  display: grid;
-  grid-template-columns: 52px 1fr;
+  display: flex;
   gap: 10px;
-  min-height: 40px;
+}
+.calendar-agenda-hours {
+  flex: 0 0 52px;
 }
 .calendar-agenda-hour {
+  height: 44px;
   font-size: 10.5px; color: var(--text-faint);
   padding-top: 2px; text-align: right;
   white-space: nowrap;
 }
-.calendar-agenda-slot {
+.calendar-agenda-rail {
   position: relative;
+  flex: 1;
+  min-width: 0;
+}
+.calendar-agenda-gridline {
+  position: absolute; left: 0; right: 0; height: 0;
   border-top: 1px solid var(--border-subtle);
 }
 .calendar-now-line {
   position: absolute; left: 0; right: 0; height: 0;
   border-top: 1.5px solid var(--accent);
+  z-index: 2;
 }
 .calendar-now-line::before {
   content: ""; position: absolute; left: -4px; top: -3.5px;
   width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+}
+.calendar-event {
+  position: absolute;
+  background: var(--accent-soft);
+  border-left: 2.5px solid var(--accent);
+  border-radius: 6px;
+  padding: 4px 7px;
+  overflow: hidden;
+  cursor: default;
+  display: flex; flex-direction: column; gap: 1px;
+  transition: filter var(--dur) var(--ease);
+}
+.calendar-event.compact {
+  flex-direction: row; align-items: center; padding: 2px 7px;
+}
+.calendar-event.compact .calendar-event-title { font-size: 11px; }
+.calendar-event:hover { filter: brightness(1.25); }
+.calendar-event-title {
+  font-size: 11.5px; font-weight: 600; color: var(--text-primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.calendar-event-time {
+  font-size: 10px; color: var(--text-secondary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .calendar-footer {
   display: flex; align-items: center; justify-content: space-between;

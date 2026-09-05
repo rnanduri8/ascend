@@ -392,35 +392,76 @@ input::placeholder, textarea::placeholder { color: var(--text-faint); }
 .calendar-daystrip-cell.selected { background: var(--accent-soft); }
 .calendar-daystrip-cell.selected .calendar-daystrip-num { color: var(--text-primary); }
 
+/* All-day events strip */
+.calendar-allday {
+  display: flex; flex-wrap: wrap; gap: 5px;
+  padding: 0 18px 8px;
+}
+.calendar-allday-chip {
+  font-size: 11px; color: var(--text-primary);
+  background: var(--accent-soft);
+  border-radius: 6px;
+  padding: 3px 8px;
+}
+
 /* Day-view hourly agenda */
 .calendar-agenda {
   flex: 1;
   overflow-y: auto;
   padding: 2px 18px 4px;
-  position: relative;
-}
-.calendar-agenda-row {
-  display: grid;
-  grid-template-columns: 52px 1fr;
+  display: flex;
   gap: 10px;
-  min-height: 40px;
+}
+.calendar-agenda-hours {
+  flex: 0 0 52px;
 }
 .calendar-agenda-hour {
+  height: 44px;
   font-size: 10.5px; color: var(--text-faint);
   padding-top: 2px; text-align: right;
   white-space: nowrap;
 }
-.calendar-agenda-slot {
+.calendar-agenda-rail {
   position: relative;
+  flex: 1;
+  min-width: 0;
+}
+.calendar-agenda-gridline {
+  position: absolute; left: 0; right: 0; height: 0;
   border-top: 1px solid var(--border-subtle);
 }
 .calendar-now-line {
   position: absolute; left: 0; right: 0; height: 0;
   border-top: 1.5px solid var(--accent);
+  z-index: 2;
 }
 .calendar-now-line::before {
   content: ""; position: absolute; left: -4px; top: -3.5px;
   width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+}
+.calendar-event {
+  position: absolute;
+  background: var(--accent-soft);
+  border-left: 2.5px solid var(--accent);
+  border-radius: 6px;
+  padding: 4px 7px;
+  overflow: hidden;
+  cursor: default;
+  display: flex; flex-direction: column; gap: 1px;
+  transition: filter var(--dur) var(--ease);
+}
+.calendar-event.compact {
+  flex-direction: row; align-items: center; padding: 2px 7px;
+}
+.calendar-event.compact .calendar-event-title { font-size: 11px; }
+.calendar-event:hover { filter: brightness(1.25); }
+.calendar-event-title {
+  font-size: 11.5px; font-weight: 600; color: var(--text-primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.calendar-event-time {
+  font-size: 10px; color: var(--text-secondary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .calendar-footer {
   display: flex; align-items: center; justify-content: space-between;
@@ -810,6 +851,12 @@ input::placeholder, textarea::placeholder { color: var(--text-faint); }
       <input type="text" id="calendarUrlInput" placeholder="https://calendar.google.com/calendar/embed?src=..." />
       <p class="field-hint">Used for the "Open in Google Calendar" link. Google Calendar → Settings → select your calendar → "Integrate calendar" → copy the "Embed code" src URL, or the public calendar link.</p>
 
+      <label class="field-label">Google Calendar ID</label>
+      <input type="text" id="gcalIdInput" placeholder="you@gmail.com, or a long id ending in @group.calendar.google.com" />
+      <label class="field-label" style="margin-top:10px;">Google Calendar API key</label>
+      <input type="text" id="gcalApiKeyInput" placeholder="AIza…" />
+      <p class="field-hint">Fill these in to show your actual events in the daily agenda, not just a link. Requires your calendar's sharing set to "Make available to public" and a Google Cloud API key with the Calendar API enabled. Both are read-only and stored only in your browser / your own Firebase project — never sent anywhere but Google.</p>
+
       <label class="field-label">Reading interests</label>
       <div id="interestChecks" class="chip-group"></div>
 
@@ -831,6 +878,13 @@ input::placeholder, textarea::placeholder { color: var(--text-faint); }
     <div class="modal-body">
       <p class="field-hint">Paste your calendar's public or embed URL. Ascend. links out to it (Google's calendar surface can't be recolored to match this theme, so we keep the dashboard native and link out for the full view).</p>
       <input type="text" id="calendarUrlInput2" placeholder="https://calendar.google.com/calendar/embed?src=..." />
+
+      <label class="field-label" style="margin-top:14px;">Calendar ID (optional — to show real events)</label>
+      <input type="text" id="gcalIdInput2" placeholder="you@gmail.com" />
+      <label class="field-label" style="margin-top:10px;">API key</label>
+      <input type="text" id="gcalApiKeyInput2" placeholder="AIza…" />
+      <p class="field-hint">Your calendar must be public, and this key needs the Calendar API enabled in Google Cloud.</p>
+
       <div class="settings-row" style="margin-top:14px;">
         <button class="btn-primary" id="calendarSaveBtn">Save</button>
       </div>
@@ -1096,6 +1150,8 @@ const READING_BANK = [
       habitLogs: {},
       journal: {},
       calendarUrl: "",
+      gcalId: "",
+      gcalApiKey: "",
       interests: ["Stoicism", "Discipline & Habits", "Productivity"],
       readingState: {},
       quoteState: {}
@@ -1771,26 +1827,115 @@ const READING_BANK = [
   const calendarUrlInput = document.getElementById("calendarUrlInput");
   const calendarUrlInput2 = document.getElementById("calendarUrlInput2");
   const calendarSaveBtn = document.getElementById("calendarSaveBtn");
+  const gcalIdInput = document.getElementById("gcalIdInput");
+  const gcalApiKeyInput = document.getElementById("gcalApiKeyInput");
+  const gcalIdInput2 = document.getElementById("gcalIdInput2");
+  const gcalApiKeyInput2 = document.getElementById("gcalApiKeyInput2");
   const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const WEEKDAY_SHORT = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
   const DAY_LETTERS = ["S","M","T","W","T","F","S"];
   const AGENDA_START_HOUR = 6;  // 6 AM
-  const AGENDA_END_HOUR = 23;   // 11 PM (exclusive-ish, last row shown)
+  const AGENDA_END_HOUR = 23;   // 11 PM (last row shown)
+  const AGENDA_ROW_HEIGHT = 44; // px — must match .calendar-agenda-hour/.calendar-agenda-gridline height in CSS
   let calendarViewDate = new Date(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate());
+  const gcalCache = {}; // session-only cache of fetched events, keyed by "<dateKey>|<calendarId>"
 
   function formatHourLabel(h) {
     const period = h < 12 ? "AM" : "PM";
     let hour12 = h % 12; if (hour12 === 0) hour12 = 12;
     return hour12 + " " + period;
   }
+  function formatEventTime(d) {
+    const period = d.getHours() < 12 ? "AM" : "PM";
+    let hour12 = d.getHours() % 12; if (hour12 === 0) hour12 = 12;
+    const mins = d.getMinutes();
+    return hour12 + (mins ? ":" + pad(mins) : "") + period;
+  }
+
+  // Google Calendar API v3 (read-only, GET) — works cross-origin with just an
+  // API key when the calendar is set to public, no OAuth/backend needed.
+  function fetchGoogleCalendarEvents(dateObj) {
+    const dayStart = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate(), 0, 0, 0);
+    const dayEnd = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate(), 23, 59, 59);
+    const params = new URLSearchParams({
+      key: state.gcalApiKey,
+      timeMin: dayStart.toISOString(),
+      timeMax: dayEnd.toISOString(),
+      singleEvents: "true",
+      orderBy: "startTime",
+      maxResults: "50",
+    });
+    const url = "https://www.googleapis.com/calendar/v3/calendars/" +
+      encodeURIComponent(state.gcalId) + "/events?" + params.toString();
+    return fetch(url).then(function (res) {
+      if (!res.ok) {
+        return res.json().catch(function () { return null; }).then(function (body) {
+          throw new Error((body && body.error && body.error.message) || ("Request failed (" + res.status + ")"));
+        });
+      }
+      return res.json();
+    }).then(function (data) {
+      const events = [];
+      const allDay = [];
+      (data.items || []).forEach(function (it) {
+        if (it.status === "cancelled") return;
+        if (it.start && it.start.date && !it.start.dateTime) {
+          allDay.push({ title: it.summary || "(untitled)" });
+        } else if (it.start && it.start.dateTime) {
+          events.push({
+            title: it.summary || "(untitled)",
+            start: new Date(it.start.dateTime),
+            end: new Date((it.end && it.end.dateTime) || it.start.dateTime),
+          });
+        }
+      });
+      return { events: events, allDay: allDay };
+    });
+  }
+
+  // Greedy column layout so overlapping events sit side-by-side instead of
+  // stacking on top of each other.
+  function layoutEvents(events) {
+    const sorted = events.slice().sort(function (a, b) { return a.start - b.start; });
+    const colEndTimes = [];
+    const placed = sorted.map(function (ev) {
+      let col = colEndTimes.findIndex(function (endTime) { return endTime <= ev.start; });
+      if (col === -1) { col = colEndTimes.length; colEndTimes.push(ev.end); }
+      else { colEndTimes[col] = ev.end; }
+      return Object.assign({}, ev, { col: col });
+    });
+    const totalCols = colEndTimes.length || 1;
+    return placed.map(function (ev) { return Object.assign({}, ev, { totalCols: totalCols }); });
+  }
+
+  function getGcalEntry(viewKey) {
+    if (!(state.gcalId && state.gcalApiKey)) return null;
+    const cacheKey = viewKey + "|" + state.gcalId;
+    let entry = gcalCache[cacheKey];
+    if (!entry) {
+      entry = { status: "loading" };
+      gcalCache[cacheKey] = entry;
+      fetchGoogleCalendarEvents(calendarViewDate).then(function (data) {
+        gcalCache[cacheKey] = { status: "ok", events: data.events, allDay: data.allDay };
+        if (dateKey(calendarViewDate) === viewKey) renderCalendar();
+      }).catch(function (err) {
+        gcalCache[cacheKey] = { status: "error", message: err.message || "Couldn't load events" };
+        if (dateKey(calendarViewDate) === viewKey) renderCalendar();
+      });
+    }
+    return entry;
+  }
 
   function renderCalendar() {
     calendarUrlInput.value = state.calendarUrl || "";
+    gcalIdInput.value = state.gcalId || "";
+    gcalApiKeyInput.value = state.gcalApiKey || "";
 
     const viewKey = dateKey(calendarViewDate);
     const isToday = viewKey === TODAY_KEY;
     const dayLabel = (isToday ? "Today, " : WEEKDAY_SHORT[calendarViewDate.getDay()] + ", ") +
       MONTH_NAMES[calendarViewDate.getMonth()] + " " + calendarViewDate.getDate();
+    const gcal = getGcalEntry(viewKey);
 
     let html = '<div class="calendar-toolbar">' +
       '<span class="calendar-month-label">' + dayLabel + '</span>' +
@@ -1818,22 +1963,68 @@ const READING_BANK = [
     }
     html += '</div>';
 
+    // All-day events strip (only when configured + loaded + present)
+    if (gcal && gcal.status === "ok" && gcal.allDay.length) {
+      html += '<div class="calendar-allday">';
+      gcal.allDay.forEach(function (ev) {
+        html += '<span class="calendar-allday-chip">' + ev.title.replace(/</g, "&lt;") + '</span>';
+      });
+      html += '</div>';
+    }
+
     // Hourly agenda for the selected day
     const nowHour = TODAY.getHours() + TODAY.getMinutes() / 60;
+    const rowCount = AGENDA_END_HOUR - AGENDA_START_HOUR + 1;
+    const railHeight = rowCount * AGENDA_ROW_HEIGHT;
+
     html += '<div class="calendar-agenda">';
+    html += '<div class="calendar-agenda-hours">';
     for (let h = AGENDA_START_HOUR; h <= AGENDA_END_HOUR; h++) {
-      const showNowLine = isToday && nowHour >= h && nowHour < h + 1;
-      html += '<div class="calendar-agenda-row">' +
-        '<span class="calendar-agenda-hour">' + formatHourLabel(h) + '</span>' +
-        '<div class="calendar-agenda-slot">' +
-          (showNowLine ? '<div class="calendar-now-line" style="top:' + ((nowHour - h) * 100) + '%"></div>' : '') +
-        '</div>' +
-      '</div>';
+      html += '<div class="calendar-agenda-hour">' + formatHourLabel(h) + '</div>';
     }
     html += '</div>';
 
+    html += '<div class="calendar-agenda-rail" style="height:' + railHeight + 'px">';
+    for (let h = AGENDA_START_HOUR; h <= AGENDA_END_HOUR; h++) {
+      html += '<div class="calendar-agenda-gridline" style="top:' + ((h - AGENDA_START_HOUR) * AGENDA_ROW_HEIGHT) + 'px"></div>';
+    }
+    if (isToday && nowHour >= AGENDA_START_HOUR && nowHour <= AGENDA_END_HOUR + 1) {
+      html += '<div class="calendar-now-line" style="top:' + ((nowHour - AGENDA_START_HOUR) * AGENDA_ROW_HEIGHT) + 'px"></div>';
+    }
+    if (gcal && gcal.status === "ok") {
+      const laidOut = layoutEvents(gcal.events);
+      laidOut.forEach(function (ev) {
+        const startHour = ev.start.getHours() + ev.start.getMinutes() / 60;
+        let endHour = ev.end.getHours() + ev.end.getMinutes() / 60;
+        if (endHour <= startHour) endHour = startHour + 0.5; // guard zero-length events
+        const clampedStart = Math.max(startHour, AGENDA_START_HOUR);
+        const clampedEnd = Math.min(endHour, AGENDA_END_HOUR + 1);
+        if (clampedEnd <= clampedStart) return; // entirely outside the shown window
+        const top = (clampedStart - AGENDA_START_HOUR) * AGENDA_ROW_HEIGHT;
+        const height = Math.max(18, (clampedEnd - clampedStart) * AGENDA_ROW_HEIGHT - 2);
+        const widthPct = 100 / ev.totalCols;
+        const leftPct = ev.col * widthPct;
+        const isCompact = height < 34; // too short to stack title + time on two lines
+        html += '<div class="calendar-event' + (isCompact ? ' compact' : '') + '" title="' + ev.title.replace(/"/g, "&quot;") +
+          ' — ' + formatEventTime(ev.start) + '" style="top:' + top + 'px;height:' + height +
+          'px;left:calc(' + leftPct + '% + 2px);width:calc(' + widthPct + '% - 6px)">' +
+          '<span class="calendar-event-title">' + ev.title.replace(/</g, "&lt;") + '</span>' +
+          (isCompact ? '' : '<span class="calendar-event-time">' + formatEventTime(ev.start) + '</span>') +
+        '</div>';
+      });
+    }
+    html += '</div>'; // rail
+    html += '</div>'; // agenda
+
+    let footerHint = state.calendarUrl ? "Connected" : "No calendar connected";
+    if (gcal) {
+      if (gcal.status === "loading") footerHint = "Loading events…";
+      else if (gcal.status === "error") footerHint = "Couldn't load events — check Settings";
+      else if (gcal.status === "ok") footerHint = (gcal.events.length + gcal.allDay.length) + " event" + ((gcal.events.length + gcal.allDay.length) === 1 ? "" : "s") + " today";
+    }
+
     html += '<div class="calendar-footer">' +
-      '<span class="calendar-footer-hint">' + (state.calendarUrl ? "Connected" : "No calendar connected") + '</span>' +
+      '<span class="calendar-footer-hint">' + footerHint + '</span>' +
       (state.calendarUrl
         ? '<a class="btn-secondary" href="' + state.calendarUrl.replace(/"/g, "&quot;") + '" target="_blank" rel="noopener">Open Google Calendar</a>'
         : '<button class="btn-secondary" id="calConnectBtn">Connect</button>') +
@@ -1860,25 +2051,37 @@ const READING_BANK = [
     const connectBtn = document.getElementById("calConnectBtn");
     if (connectBtn) connectBtn.addEventListener("click", function () {
       calendarUrlInput2.value = state.calendarUrl || "";
+      gcalIdInput2.value = state.gcalId || "";
+      gcalApiKeyInput2.value = state.gcalApiKey || "";
       openModal(calendarModal);
     });
     // Auto-scroll the agenda so the relevant hours are in view on open
-    const agendaEl = calendarWidget.querySelector(".calendar-agenda");
-    if (agendaEl) {
+    const railEl = calendarWidget.querySelector(".calendar-agenda-rail");
+    const agendaWrap = calendarWidget.querySelector(".calendar-agenda");
+    if (railEl && agendaWrap) {
       const scrollHour = isToday ? Math.max(AGENDA_START_HOUR, TODAY.getHours() - 1) : 8;
-      const row = agendaEl.children[Math.min(scrollHour - AGENDA_START_HOUR, agendaEl.children.length - 1)];
-      if (row) agendaEl.scrollTop = row.offsetTop;
+      agendaWrap.scrollTop = Math.max(0, (scrollHour - AGENDA_START_HOUR) * AGENDA_ROW_HEIGHT);
     }
   }
   function saveCalendarUrl(url) {
     state.calendarUrl = url.trim();
     persist(); renderCalendar();
   }
+  function saveGcalConfig(id, key) {
+    const idChanged = state.gcalId !== id.trim() || state.gcalApiKey !== key.trim();
+    state.gcalId = id.trim();
+    state.gcalApiKey = key.trim();
+    persist();
+    if (idChanged) renderCalendar(); // fresh config → force a re-fetch via the new cache key
+  }
   calendarSaveBtn.addEventListener("click", function () {
     saveCalendarUrl(calendarUrlInput2.value);
+    saveGcalConfig(gcalIdInput2.value, gcalApiKeyInput2.value);
     closeModal(calendarModal);
   });
   calendarUrlInput.addEventListener("change", function () { saveCalendarUrl(calendarUrlInput.value); });
+  gcalIdInput.addEventListener("change", function () { saveGcalConfig(gcalIdInput.value, gcalApiKeyInput.value); });
+  gcalApiKeyInput.addEventListener("change", function () { saveGcalConfig(gcalIdInput.value, gcalApiKeyInput.value); });
 
   // ---------------------------------------------------------------------
   // Streak badge (top bar) — consecutive days with any habit logged

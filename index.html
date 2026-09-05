@@ -205,6 +205,12 @@
       <input type="text" id="calendarUrlInput" placeholder="https://calendar.google.com/calendar/embed?src=..." />
       <p class="field-hint">Used for the "Open in Google Calendar" link. Google Calendar → Settings → select your calendar → "Integrate calendar" → copy the "Embed code" src URL, or the public calendar link.</p>
 
+      <label class="field-label">Google Calendar ID</label>
+      <input type="text" id="gcalIdInput" placeholder="you@gmail.com, or a long id ending in @group.calendar.google.com" />
+      <label class="field-label" style="margin-top:10px;">Google Calendar API key</label>
+      <input type="text" id="gcalApiKeyInput" placeholder="AIza…" />
+      <p class="field-hint">Fill these in to show your actual events in the daily agenda, not just a link. Requires your calendar's sharing set to "Make available to public" and a Google Cloud API key with the Calendar API enabled. Both are read-only and stored only in your browser / your own Firebase project — never sent anywhere but Google.</p>
+
       <label class="field-label">Reading interests</label>
       <div id="interestChecks" class="chip-group"></div>
 
@@ -226,6 +232,13 @@
     <div class="modal-body">
       <p class="field-hint">Paste your calendar's public or embed URL. Ascend. links out to it (Google's calendar surface can't be recolored to match this theme, so we keep the dashboard native and link out for the full view).</p>
       <input type="text" id="calendarUrlInput2" placeholder="https://calendar.google.com/calendar/embed?src=..." />
+
+      <label class="field-label" style="margin-top:14px;">Calendar ID (optional — to show real events)</label>
+      <input type="text" id="gcalIdInput2" placeholder="you@gmail.com" />
+      <label class="field-label" style="margin-top:10px;">API key</label>
+      <input type="text" id="gcalApiKeyInput2" placeholder="AIza…" />
+      <p class="field-hint">Your calendar must be public, and this key needs the Calendar API enabled in Google Cloud.</p>
+
       <div class="settings-row" style="margin-top:14px;">
         <button class="btn-primary" id="calendarSaveBtn">Save</button>
       </div>
