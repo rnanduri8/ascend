@@ -368,6 +368,58 @@ input::placeholder, textarea::placeholder { color: var(--text-faint); }
 .calendar-cell.other-month { color: var(--text-faint); opacity: .4; }
 .calendar-cell.today { background: var(--accent); color: #0a0a0d; font-weight: 600; }
 .calendar-cell:not(.today):hover { background: var(--surface-hover); }
+
+/* Day-view week strip */
+.calendar-daystrip {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  padding: 10px 14px 8px;
+}
+.calendar-daystrip-cell {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 6px 0 7px;
+  border-radius: 9px;
+  border: none; background: transparent; cursor: pointer;
+  transition: background-color var(--dur) var(--ease);
+}
+.calendar-daystrip-cell:hover { background: var(--surface-hover); }
+.calendar-daystrip-letter { font-size: 9.5px; color: var(--text-faint); text-transform: uppercase; letter-spacing: .04em; }
+.calendar-daystrip-num { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+.calendar-daystrip-cell.today .calendar-daystrip-num { color: var(--accent); font-weight: 700; }
+.calendar-daystrip-cell.selected { background: var(--accent-soft); }
+.calendar-daystrip-cell.selected .calendar-daystrip-num { color: var(--text-primary); }
+
+/* Day-view hourly agenda */
+.calendar-agenda {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2px 18px 4px;
+  position: relative;
+}
+.calendar-agenda-row {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 10px;
+  min-height: 40px;
+}
+.calendar-agenda-hour {
+  font-size: 10.5px; color: var(--text-faint);
+  padding-top: 2px; text-align: right;
+  white-space: nowrap;
+}
+.calendar-agenda-slot {
+  position: relative;
+  border-top: 1px solid var(--border-subtle);
+}
+.calendar-now-line {
+  position: absolute; left: 0; right: 0; height: 0;
+  border-top: 1.5px solid var(--accent);
+}
+.calendar-now-line::before {
+  content: ""; position: absolute; left: -4px; top: -3.5px;
+  width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+}
 .calendar-footer {
   display: flex; align-items: center; justify-content: space-between;
   padding: 10px 18px; border-top: 1px solid var(--border-subtle);

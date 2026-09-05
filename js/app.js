@@ -736,19 +736,28 @@
   const calendarUrlInput2 = document.getElementById("calendarUrlInput2");
   const calendarSaveBtn = document.getElementById("calendarSaveBtn");
   const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  let calendarViewDate = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
+  const WEEKDAY_SHORT = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const DAY_LETTERS = ["S","M","T","W","T","F","S"];
+  const AGENDA_START_HOUR = 6;  // 6 AM
+  const AGENDA_END_HOUR = 23;   // 11 PM (exclusive-ish, last row shown)
+  let calendarViewDate = new Date(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate());
+
+  function formatHourLabel(h) {
+    const period = h < 12 ? "AM" : "PM";
+    let hour12 = h % 12; if (hour12 === 0) hour12 = 12;
+    return hour12 + " " + period;
+  }
 
   function renderCalendar() {
     calendarUrlInput.value = state.calendarUrl || "";
 
-    const year = calendarViewDate.getFullYear();
-    const month = calendarViewDate.getMonth();
-    const firstOfMonth = new Date(year, month, 1);
-    const startOffset = (firstOfMonth.getDay() + 6) % 7; // Monday-first
-    const gridStart = addDays(firstOfMonth, -startOffset);
+    const viewKey = dateKey(calendarViewDate);
+    const isToday = viewKey === TODAY_KEY;
+    const dayLabel = (isToday ? "Today, " : WEEKDAY_SHORT[calendarViewDate.getDay()] + ", ") +
+      MONTH_NAMES[calendarViewDate.getMonth()] + " " + calendarViewDate.getDate();
 
     let html = '<div class="calendar-toolbar">' +
-      '<span class="calendar-month-label">' + MONTH_NAMES[month] + ' ' + year + '</span>' +
+      '<span class="calendar-month-label">' + dayLabel + '</span>' +
       '<div class="calendar-nav">' +
         '<button class="icon-btn btn-small" id="calPrevBtn">‹</button>' +
         '<button class="icon-btn btn-small" id="calTodayBtn">•</button>' +
@@ -756,13 +765,34 @@
       '</div>' +
     '</div>';
 
-    html += '<div class="calendar-grid">';
-    ["M","T","W","T","F","S","S"].forEach(function (d) { html += '<div class="calendar-weekday">' + d + '</div>'; });
-    for (let i = 0; i < 42; i++) {
-      const d = addDays(gridStart, i);
-      const isOtherMonth = d.getMonth() !== month;
-      const isToday = dateKey(d) === TODAY_KEY;
-      html += '<div class="calendar-cell' + (isOtherMonth ? ' other-month' : '') + (isToday ? ' today' : '') + '">' + d.getDate() + '</div>';
+    // Week strip — quick-jump day picker for the week containing the viewed day
+    const startOffset = calendarViewDate.getDay(); // Sunday-first strip
+    const stripStart = addDays(calendarViewDate, -startOffset);
+    html += '<div class="calendar-daystrip">';
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(stripStart, i);
+      const dKey = dateKey(d);
+      const isSel = dKey === viewKey;
+      const isTod = dKey === TODAY_KEY;
+      html += '<button class="calendar-daystrip-cell' + (isSel ? ' selected' : '') + (isTod ? ' today' : '') +
+        '" data-day="' + dKey + '">' +
+        '<span class="calendar-daystrip-letter">' + DAY_LETTERS[d.getDay()] + '</span>' +
+        '<span class="calendar-daystrip-num">' + d.getDate() + '</span>' +
+      '</button>';
+    }
+    html += '</div>';
+
+    // Hourly agenda for the selected day
+    const nowHour = TODAY.getHours() + TODAY.getMinutes() / 60;
+    html += '<div class="calendar-agenda">';
+    for (let h = AGENDA_START_HOUR; h <= AGENDA_END_HOUR; h++) {
+      const showNowLine = isToday && nowHour >= h && nowHour < h + 1;
+      html += '<div class="calendar-agenda-row">' +
+        '<span class="calendar-agenda-hour">' + formatHourLabel(h) + '</span>' +
+        '<div class="calendar-agenda-slot">' +
+          (showNowLine ? '<div class="calendar-now-line" style="top:' + ((nowHour - h) * 100) + '%"></div>' : '') +
+        '</div>' +
+      '</div>';
     }
     html += '</div>';
 
@@ -776,19 +806,33 @@
     calendarWidget.innerHTML = html;
 
     document.getElementById("calPrevBtn").addEventListener("click", function () {
-      calendarViewDate = new Date(year, month - 1, 1); renderCalendar();
+      calendarViewDate = addDays(calendarViewDate, -1); renderCalendar();
     });
     document.getElementById("calNextBtn").addEventListener("click", function () {
-      calendarViewDate = new Date(year, month + 1, 1); renderCalendar();
+      calendarViewDate = addDays(calendarViewDate, 1); renderCalendar();
     });
     document.getElementById("calTodayBtn").addEventListener("click", function () {
-      calendarViewDate = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1); renderCalendar();
+      calendarViewDate = new Date(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate()); renderCalendar();
+    });
+    calendarWidget.querySelectorAll(".calendar-daystrip-cell").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        const parts = btn.getAttribute("data-day").split("-").map(Number);
+        calendarViewDate = new Date(parts[0], parts[1] - 1, parts[2]);
+        renderCalendar();
+      });
     });
     const connectBtn = document.getElementById("calConnectBtn");
     if (connectBtn) connectBtn.addEventListener("click", function () {
       calendarUrlInput2.value = state.calendarUrl || "";
       openModal(calendarModal);
     });
+    // Auto-scroll the agenda so the relevant hours are in view on open
+    const agendaEl = calendarWidget.querySelector(".calendar-agenda");
+    if (agendaEl) {
+      const scrollHour = isToday ? Math.max(AGENDA_START_HOUR, TODAY.getHours() - 1) : 8;
+      const row = agendaEl.children[Math.min(scrollHour - AGENDA_START_HOUR, agendaEl.children.length - 1)];
+      if (row) agendaEl.scrollTop = row.offsetTop;
+    }
   }
   function saveCalendarUrl(url) {
     state.calendarUrl = url.trim();
